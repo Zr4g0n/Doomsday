@@ -18,7 +18,7 @@ function doomsday_status()
 	game.print("Doomsday loaded!")
 	game.print("global.doomsday_start: " .. global.doomsday_start)
 	game.print("global.doomsday_pollution: " .. global.doomsday_pollution)
-	game.print("global.doomsday_surfance: " .. global.doomsday_surfance)
+	game.print("global.doomsday_surfance: " .. global.doomsday_surface)
 	game.print("global.doomsday_enabled: " .. pdnc_bool_to_string(global.doomsday_enabled))
 	game.print("global.doomsday_enable_players_online_compensator: " .. pdnc_bool_to_string(global.doomsday_enable_players_online_compensator))
 	game.print("global.doomsday_current_fuzzy_playercount: " .. global.doomsday_current_fuzzy_playercount)
@@ -61,7 +61,7 @@ function doomsday_early_death()
 end
 
 function doomsday_activate_different_spawn()
-	game.forces["player"].set_spawn_position(global.doomsday_different_spawn, game.surfaces[global.doomsday_surfance])
+	game.forces["player"].set_spawn_position(global.doomsday_different_spawn, game.surfaces[global.doomsday_surface])
 end
 
 function doomsday_core()
@@ -69,7 +69,7 @@ function doomsday_core()
 		doomsday_players_online_compensator()
 	end
 
-	local current_time = game.tick / game.surfaces[global.doomsday_surfance].ticks_per_day
+	local current_time = game.tick / game.surfaces[global.doomsday_surface].ticks_per_day
 	
 	if global.doomsday_use_early_death
 	and (current_time > 1) 
@@ -110,17 +110,17 @@ function doomsday_pollute(radius,pollution,nodes) -- spawn a ring of pollution b
 	if global.doomsday_use_different_spawn then
 		position = global.doomsday_different_spawn
 	end
-	game.surfaces[global.doomsday_surfance].pollute(position, p) --circle + center point
+	game.surfaces[global.doomsday_surface].pollute(position, p) --circle + center point
 	local step = (math.pi * 2) / (nodes - 1)
 	for i=0, (nodes - 1) do 
 		position = {x = math.sin(step*i)*radius, y = math.cos(step*i)*radius}		 
-		game.surfaces[global.doomsday_surfance].pollute(position, p)
+		game.surfaces[global.doomsday_surface].pollute(position, p)
 	end
 end
 
 function doomsday_time_left()
 	if (global.doomsday_start > 0)then
-		local ticks_until_doomsday = game.surfaces[global.doomsday_surfance].ticks_per_day * global.doomsday_start
+		local ticks_until_doomsday = game.surfaces[global.doomsday_surface].ticks_per_day * global.doomsday_start
 		local ticks = ticks_until_doomsday - game.tick
 		if (ticks >= 0) then 
 			local seconds = math.floor(ticks/ 60)
