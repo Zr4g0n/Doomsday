@@ -91,7 +91,6 @@ function pdnc_core()
 	current_surface.ticks_per_day = pdnc_min_to_ticks(0.5) -- move this somewhere else; doesn't need to run every nth tick!
 	if(global.pdnc_enabled)then
 		pdnc_freeze_check()
-		current_surface.ticks_per_day = pdnc_min_to_ticks(10.0)
 		local s = game.surfaces[global.pdnc_surface]
 		global.pdnc_current_time = game.tick / current_surface.ticks_per_day
 		global.pdnc_last_point = global.pdnc_current_point
