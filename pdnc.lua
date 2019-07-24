@@ -87,13 +87,22 @@ function pdnc_bool_to_string(b)
 end
 
 function pdnc_core()
-	local current_surface = game.surfaces[global.pdnc_surface]
-	current_surface.ticks_per_day = pdnc_min_to_ticks(0.5) -- move this somewhere else; doesn't need to run every nth tick!
 	if(global.pdnc_enabled)then
-		pdnc_freeze_check()
-		local s = game.surfaces[global.pdnc_surface]
+		local current_surface = game.surfaces[global.pdnc_surface]
+		pdnc_freeze_check(current_surface)
+		current_surface.ticks_per_day = pdnc_min_to_ticks(0.5) -- move this somewhere else; doesn't need to run every nth tick!
+	
+
 		global.pdnc_current_time = game.tick / current_surface.ticks_per_day
-		global.pdnc_last_point = global.pdnc_current_point
+		
+		-- get current Y coordinate. X = 0 always. 
+		local current_x = 0
+		-- get next Y coordinate, X = 'step size'
+		local next_x = current_surface.ticks_per_day/global.pdnc_stepsize
+		
+		local current_y = pdnc_program(global.pdnc_current_time)
+		local next_y = (global.pdnc_current_time + next_x)
+
 		global.pdnc_current_point = {x = global.pdnc_current_time, y = pdnc_program(global.pdnc_current_time)}
 		-- replace with 'now' and 'next' instead of 'prew' and 'now'. Less errors that way. 
 		
