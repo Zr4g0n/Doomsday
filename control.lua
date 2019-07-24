@@ -3,7 +3,6 @@ require "doomsday"
 
 function start_init()
 	pdnc_setup()
-	--game.surfaces[global.pdnc_surface].ticks_per_day = pdnc_min_to_ticks(10.0)
 end
 
 function start_load()

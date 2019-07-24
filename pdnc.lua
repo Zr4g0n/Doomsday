@@ -10,18 +10,19 @@
 -- lamps enable darkness: [0.595 - 0.425] scaled to [0.0 - 0.85] range from [0.0 - 1.0] range
 global.pdnc = global.pdnc or {}
 global.pdnc_enabled = true 
-global.pdnc_stepsize = 21 -- also used for script.on_nth_tick
+global.pdnc_stepsize = 53 -- also used for script.on_nth_tick. Cannot be changed at runtime! 
 global.pdnc_surface = 1
 global.pdnc_current_time = 0
 global.pdnc_current_point = {x = 0, y = 1.0}
 global.pdnc_last_point = {x = -1, y = 0.0}
 global.pdnc_max_brightness = 0.5 -- for clusterio
-global.pdnc_debug = false
+global.pdnc_debug = true
 global.pdnc_enable_brightness_limit = false
 global.pdnc_enable_rocket_darkness = false
 global.pdnc_rockets_launched = 0
 global.pdnc_rockets_launched_step_size = 0.025
 global.pdnc_rockets_launched_smooth = 0
+global.pdnc_min_per_day = 0.5
 
 function pdnc_setup()
 	--game.surfaces[global.pdnc_surface].ticks_per_day = pdnc_min_to_ticks(10.0)
@@ -65,14 +66,11 @@ function pdnc_extended_status()
 	game.print("global.pdnc_stepsize: " .. global.pdnc_stepsize)
 	game.print("global.pdnc_surface: " .. global.pdnc_surface)
 	game.print("global.pdnc_current_time: " .. global.pdnc_current_time)
-	game.print("global.pdnc_current_point x, y: " .. global.pdnc_current_point.x .. ", " .. global.pdnc_current_point.y)
-	game.print("global.pdnc_last_point x, y: " .. global.pdnc_last_point.x .. ", " .. global.pdnc_last_point.y)
 	game.print("global.pdnc_max_brightness: " .. global.pdnc_max_brightness)
 	game.print("global.pdnc_enable_brightness_limit: " .. pdnc_bool_to_string(global.pdnc_enable_brightness_limit))
 	game.print("global.pdnc_enable_rocket_darkness: " .. pdnc_bool_to_string(global.pdnc_enable_rocket_darkness))
 	game.print("global.pdnc_rockets_launched: " .. global.pdnc_rockets_launched)
 	game.print("global.pdnc_rockets_launched_step_size: " .. global.pdnc_rockets_launched_step_size)
-	game.print("global.pdnc_stepsize: " .. global.pdnc_stepsize)
 	game.print("global.pdnc_rockets_launched_smooth: " .. global.pdnc_rockets_launched_smooth)
 	game.print("ticks per day: " .. game.surfaces[global.pdnc_surface].ticks_per_day)
 	game.print("current tick: " .. game.tick)
@@ -87,34 +85,29 @@ function pdnc_bool_to_string(b)
 end
 
 function pdnc_core()
-	game.surfaces[global.pdnc_surface].ticks_per_day = pdnc_min_to_ticks(10.0)
 	if(global.pdnc_enabled)then
-		pdnc_freeze_check()
-		game.surfaces[global.pdnc_surface].ticks_per_day = pdnc_min_to_ticks(10.0)
-		local s = global.pdnc_surface
-		global.pdnc_current_time = game.tick / game.surfaces[s].ticks_per_day
-		global.pdnc_last_point = global.pdnc_current_point
-		global.pdnc_current_point = {x = global.pdnc_current_time, y = pdnc_program()}
+		local current_surface = game.surfaces[global.pdnc_surface]
+		pdnc_freeze_check(current_surface)
+		current_surface.ticks_per_day = pdnc_min_to_ticks(global.pdnc_min_per_day) -- move this somewhere else; doesn't need to run every nth tick!
+		global.pdnc_current_time = game.tick / current_surface.ticks_per_day
 		
-		if(global.doomsday ~= nil) and (global.doomsday_enabled)then
-			global.pdnc_current_point = {x = global.pdnc_current_time, y = doomsday_core()}
-		--elseif(global.eternal_night ~= nil)then
-		--	global.pdnc_current_point = {x = global.pdnc_current_time, y = eternal_night_core()}
-		else
-			global.pdnc_current_point = {x = global.pdnc_current_time, y = pdnc_program()}
-		end
-		local top_point = pdnc_intersection_top (global.pdnc_last_point, global.pdnc_current_point)
-		local bot_point = pdnc_intersection_bot (global.pdnc_last_point, global.pdnc_current_point)
+		-- get current Y coordinate. X = 0 always. 
+		local current_point = {x = global.pdnc_current_time, y = pdnc_program(global.pdnc_current_time)}
+		-- get next Y coordinate, X = 'step size'
+		local next_point = {x = (global.pdnc_current_time + (global.pdnc_stepsize/current_surface.ticks_per_day)), y = pdnc_program(global.pdnc_current_time + (global.pdnc_stepsize/current_surface.ticks_per_day))}
+		
+		local top_point = pdnc_intersection_top(current_point, next_point)
+		local bot_point = pdnc_intersection_bot(current_point, next_point)
 		
 		-- the order is dusk - evening - morning - dawn. They *must* be in that order and they cannot be equal
 		if(top_point < bot_point) then -- dusk -> evening
-			pdnc_cleanup_last_tick(s)
-			game.surfaces[s].evening = bot_point - global.pdnc_current_time
-			game.surfaces[s].dusk = top_point - global.pdnc_current_time
+			pdnc_cleanup_last_tick(current_surface)
+			current_surface.evening = bot_point - current_point.x
+			current_surface.dusk = top_point - current_point.x
 		elseif(top_point > bot_point) then -- morning -> dawn
-			pdnc_cleanup_last_tick(s)
-			game.surfaces[s].morning = bot_point - global.pdnc_current_time
-			game.surfaces[s].dawn = top_point - global.pdnc_current_time
+			pdnc_cleanup_last_tick(current_surface)
+			current_surface.morning = bot_point - current_point.x
+			current_surface.dawn = top_point - current_point.x
 		elseif(top_point == bot_point) then
 			pdnc_debug_message("PDNC: Top and bot point equal")
 			-- no cleanup is done here
@@ -126,42 +119,44 @@ function pdnc_core()
 			pdnc_debug_message("top_point: " .. top_point)
 			-- this should never be reached.
 		end
+	else
 	end
 end
 
-function pdnc_cleanup_last_tick(s)
-	game.surfaces[s].daytime = 0
+function pdnc_cleanup_last_tick(current_surface)
+	current_surface.daytime = 0
 	-- must be in this  spesific order to 
 	-- preserve the order at all times
 	-- dusk < evening < morning < dawn.
-	game.surfaces[s].dusk = -999999999999
-	game.surfaces[s].dawn = 999999999999
-	game.surfaces[s].evening = -999999999998
-	game.surfaces[s].morning = 999999999998
+	-- DO NOT CHANGE THE ORDER!
+	current_surface.dusk = -999999999999
+	current_surface.dawn = 999999999999
+	current_surface.evening = -999999999998
+	current_surface.morning = 999999999998
 end
 
 function pdnc_disable_and_reset()
-	local s = game.surfaces[global.pdnc_surface]
-	pdnc_cleanup_last_tick(global.pdnc_surface)
-	s.evening = 0.45
-	s.morning = 0.55
-	s.dusk = 0.25
-	s.dawn = 0.75
-	s.ticks_per_day = 25000
+	local current_surface = game.surfaces[global.pdnc_surface]
+	pdnc_cleanup_last_tick(current_surface)
+	-- DO NOT CHANGE THIS ORDER! 
+	current_surface.evening = 0.45
+	current_surface.morning = 0.55
+	current_surface.dusk = 0.25
+	current_surface.dawn = 0.75
+	current_surface.ticks_per_day = 25000
 	global.pdnc_enabled = false
-	pdnc_debug_message("PDNC disabled and normal DNC enabled")
+	pdnc_debug_message("PDNC Programable Day-Night Cycle disabled, normal day-night cycle enabled")
 end
 
-function pdnc_freeze_check()
-	if(game.surfaces[1].freeze_daytime)then
-		game.surfaces[1].freeze_daytime = false
+function pdnc_freeze_check(current_surface)
+	if(current_surface.freeze_daytime)then
+		current_surface.freeze_daytime = false
 		game.print("Can't use freeze_daytime while programmable day-night cycle is active; time has been unfrozen")
 	end
 end
 
-function pdnc_program()
-	local x = global.pdnc_current_time * math.pi * 2
-	return pdnc_scaler(pdnc_c_boxy(x))
+function pdnc_program(x)
+	return pdnc_scaler(pdnc_c_boxy(x*6.28318530717958647692)) -- that's Tau, aka 2xPi
 end
 
 function pdnc_c_boxy(x)
