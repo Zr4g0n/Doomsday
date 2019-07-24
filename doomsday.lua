@@ -6,7 +6,7 @@ global.doomsday_enabled = true
 global.doomsday = global.doomsday or {} -- used to check if this exists. 
 global.doomsday_start = 17.75 -- in ingame days. Use n.75 to make sure doomsday is at midnight. 
 global.doomsday_pollution = 200000 -- amount to be applied per tick
-global.doomsday_surfance = 1
+global.doomsday_surface = 1
 global.doomsday_enable_players_online_compensator = false
 global.doomsday_current_fuzzy_playercount = 1.5 -- start assuming 1.5 players! :V
 global.doomsday_use_early_death = true
@@ -18,7 +18,7 @@ function doomsday_status()
 	game.print("Doomsday loaded!")
 	game.print("global.doomsday_start: " .. global.doomsday_start)
 	game.print("global.doomsday_pollution: " .. global.doomsday_pollution)
-	game.print("global.doomsday_surfance: " .. global.doomsday_surface)
+	game.print("global.doomsday_surface: " .. global.doomsday_surface)
 	game.print("global.doomsday_enabled: " .. pdnc_bool_to_string(global.doomsday_enabled))
 	game.print("global.doomsday_enable_players_online_compensator: " .. pdnc_bool_to_string(global.doomsday_enable_players_online_compensator))
 	game.print("global.doomsday_current_fuzzy_playercount: " .. global.doomsday_current_fuzzy_playercount)
