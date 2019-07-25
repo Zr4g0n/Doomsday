@@ -249,25 +249,41 @@ function pdnc_debug_message(s)
 	end
 end
 
+
 local PDNC_init = {}
 
+local script_events = {
+	--place the here what you would normaly use Event.register for
+	-- Event.register(defines.events.on_player_created, testfunction)
+	-- is the same as 
+	-- [defines.events.on_player_created] = testfunction,
+	-- where testfunction is | local functuin testfunction() { }
+	--[Event] = function, 
+	--put stuff here
+
+}
+
 PDNC_init.on_nth_ticks = {
+	--place the here what you would normaly use 
+    --[tick] = function,
+    --put stuff here
     [global.pdnc_stepsize] = pdnc_core,
 }
 
-PDNC_init.on_init = function() 
-    log("PDNC Init")
-    global.poseidon_data = global.poseidon_data or script_data  -- NO TOUCHY
+PDNC_init.on_init = function() -- this runs when Event.core_events.init
+    log("PDNC init")
+	--put stuff here
+
+    global.PDNC_data = global.PDNC_data or script_data  -- NO TOUCHY
+
 end
 
-PDNC_init.on_load = function()
-    game.print("PDNC load")
+PDNC_init.on_load = function() -- this runs when Event.core_events.load
+    log("PDNC load")
+	--put stuff here
+
     script_data = global.PDNC_data or script_data  -- NO TOUCHY
 end
-
-local script_events = {
-
-}
 
 PDNC_init.get_events = function()
     return script_events
@@ -277,6 +293,3 @@ return PDNC_init
 
 --script.on_load(pdnc_on_load())
 -- on init and on load, run: pdnc_on_load() doomsday_on_load()
-
-
-

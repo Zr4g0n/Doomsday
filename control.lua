@@ -95,37 +95,49 @@ for i,mod in ipairs(modules) do
 end
 
 
-
 --[[
-This is a example of what to put at the end of your code, ie doomsday.lua
-replaze EXAMPLE with any name you want
-replace tick with number if ticks and function with the function name to call
 
+-- This is a example of what to put at the end of your code, ie doomsday.lua
+-- replace all the EXAMPLE 's with any name you want, they have to be all the same
+-- replace tick with number if ticks and function with the function name to call
+-- everywhere there is a blank space is where you put stuff in
 
 
 
 local EXAMPLE_init = {}
 
-EXAMPLE_init.on_nth_ticks = {
-    [tick] = function,
+local script_events = {
+	--place the here what you would normaly use Event.register for
+	-- Event.register(defines.events.on_player_created, testfunction)
+	-- is the same as 
+	-- [defines.events.on_player_created] = testfunction,
+	-- where testfunction is | local function testfunction() { }
+	--[Event] = function, 
+	--put stuff here
+ 
 }
 
-EXAMPLE_init.on_init = function() 
-    log("EXAMPLE init")
+EXAMPLE_init.on_nth_ticks = {
+	--place the here what you would normaly use 
+    --[tick] = function,
+    --put stuff here
 
-    global.EXAMPLE_data = global.poseidon_data or script_data  -- NO TOUCHY
+}
+
+EXAMPLE_init.on_init = function() -- this runs when Event.core_events.init
+    log("EXAMPLE init")
+	--put stuff here
+
+    global.EXAMPLE_data = global.EXAMPLE_data or script_data  -- NO TOUCHY
 
 end
 
-EXAMPLE_init.on_load = function()
-    game.print("EXAMPLE load")
+EXAMPLE_init.on_load = function() -- this runs when Event.core_events.load
+    log("EXAMPLE load")
+	--put stuff here
 
     script_data = global.EXAMPLE_data or script_data  -- NO TOUCHY
 end
-
-local script_events = {
-	[Event] = function,
-}
 
 EXAMPLE_init.get_events = function()
     return script_events

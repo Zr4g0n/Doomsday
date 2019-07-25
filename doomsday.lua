@@ -175,27 +175,46 @@ function reduce_brightness(n)
 end	
 ]]
 
+
+
+-- This is a example of what to put at the end of your code, ie doomsday.lua
+-- replaze EXAMPLE with any name you want
+-- replace tick with number if ticks and function with the function name to call
+-- everywhere there is a blank space is where you put stuff in
+
 local doomsday_init = {}
 
-doomsday_init.on_nth_ticks = {
-
-}
-
-doomsday_init.on_init = function() 
-    game.print("doomsday Init")
-    global.doomsday_data = global.doomsday_data or script_data -- NO TOUCHY
-    doomsday_setup()
-end
-
-doomsday_init.on_load = function()
-    game.print("doomsday load")
-    script_data = global.doomsday_data or script_data  -- NO TOUCHY
-    doomsday_on_load()
-end
-
 local script_events = {
+	--place the here what you would normaly use Event.register for
+	-- Event.register(defines.events.on_player_created, testfunction)
+	-- is the same as 
+	-- [defines.events.on_player_created] = testfunction,
+	-- where testfunction is | local functuin testfunction() { }
+	--[Event] = function, 
+	--put stuff here
 
 }
+
+doomsday_init.on_nth_ticks = {
+	--place the here what you would normaly use 
+    --[tick] = function,
+    --put stuff here
+    
+}
+
+doomsday_init.on_init = function() -- this runs when Event.core_events.init
+    log("doomsday init")
+	--put stuff here
+	doomsday_setup()
+    global.doomsday_data = global.doomsday_data or script_data  -- NO TOUCHY
+end
+
+doomsday_init.on_load = function() -- this runs when Event.core_events.load
+    log("doomsday load")
+	--put stuff here
+	doomsday_on_load()
+    script_data = global.doomsday_data or script_data  -- NO TOUCHY
+end
 
 doomsday_init.get_events = function()
     return script_events
