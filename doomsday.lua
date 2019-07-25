@@ -46,6 +46,9 @@ function doomsday_setup()
 end
 
 function doomsday_on_load()
+	--Everything is now support within the GUI
+	--ill leave this here incase we use it for something else
+
 	-- commands.add_command("timeleft", "Gives you the time till doomsday!", doomsday_time_left)
 	-- commands.add_command("doomsday", "Prints doomsday status", doomsday_status)
 end
@@ -175,6 +178,13 @@ function reduce_brightness(n)
 end	
 ]]
 
+
+
+--[[
+This is the new (easy) way to do basically all the startup stuff
+check control.lua for a example on how it works
+]]
+
 local doomsday_init = {}
 
 doomsday_init.on_nth_ticks = {
@@ -183,13 +193,13 @@ doomsday_init.on_nth_ticks = {
 
 doomsday_init.on_init = function() 
     game.print("doomsday Init")
-    global.doomsday_data = global.doomsday_data or script_data -- NO TOUCHY
+    global.doomsday_data = global.doomsday_data or script_data -- NO TOUCHY WILL CAUSE DESYNC
     doomsday_setup()
 end
 
 doomsday_init.on_load = function()
     game.print("doomsday load")
-    script_data = global.doomsday_data or script_data  -- NO TOUCHY
+    script_data = global.doomsday_data or script_data -- NO TOUCHY WILL CAUSE DESYNC
     doomsday_on_load()
 end
 

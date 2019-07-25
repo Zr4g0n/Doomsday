@@ -2,56 +2,122 @@ local mod_gui = require 'mod-gui'
 
 local function gui_update(player)
     local gui = mod_gui.get_frame_flow(player)
-    local frame = gui.doomsday_stats
-    if not frame then
+    local doomsday = gui.doomsday_stats
+    local PDNC = gui.pdnd_stats
+
+    -- text = pdnc_extended_status()
+    -- game.print(text)
+    if not doomsday then
+        return
+    end
+    if not PDNC then
         return
     end
     
-    frame.clear()
-    for i,stat in ipairs(doomsday_status()) do
-	    frame.add{
+    doomsday.clear()
+    for i,stat1 in ipairs(doomsday_status()) do
+	    doomsday.add{
 	        type = "label",
-	        caption = stat
+	        caption = stat1
+	    }
+	end
+
+	PDNC.clear()
+    for i,stat2 in ipairs(pdnc_extended_status()) do
+	    PDNC.add{
+	        type = "label",
+	        caption = stat2
 	    }
 	end
 end
 
-local function toggle_frame(player)
+local function toggle_frame(player, button)
     local gui = mod_gui.get_frame_flow(player)
-    local frame = gui.doomsday_stats
+    local doom = gui.doom_stat
+    local pdnc = gui.pdnd_stat
     
-    if frame then
-        frame.destroy()
+    if doom then
+        gui.destroy()
         return
     end
-    
-    frame = gui.add{
+
+	if not doom then
+        doom = gui.add{
+            type = "button",
+            name = "doom_stat",
+            caption = "Doom Stats",
+            tooltip = "Show debug stats for doom",
+        }
+    end
+
+    if not pdnc then
+        pdnc = gui.add{
+            type = "button",
+            name = "pdnd_stat",
+            caption = "PDNC Stats",
+            tooltip = "Show debug stats for PDNC",
+        }
+    end 
+	gui_update(player)
+end
+
+local function doom_stat(player)
+	local gui = mod_gui.get_frame_flow(player)
+	local DoomStat = gui.doomsday_stats
+
+	if DoomStat then
+	    DoomStat.destroy()
+	    return
+	end
+
+    DoomStat = gui.add{
         type = "frame",
         name = "doomsday_stats",
         direction = "vertical",
-        caption = "Doomsday stats",
+        caption = "Doomsday stats page",
         style = mod_gui.frame_style,
     }
-    
-    frame.style.horizontally_stretchable = false
-    frame.style.vertically_stretchable = false
-    gui_update(player)
+    DoomStat.style.horizontally_stretchable = false
+	DoomStat.style.vertically_stretchable = false
+	gui_update(player)
+end
+
+local function PDNC_stat(player)
+	local gui = mod_gui.get_frame_flow(player)
+	local PDNCstats = gui.pdnd_stats
+
+	if PDNCstats then
+	    PDNCstats.destroy()
+	    return
+	end
+
+    PDNCstats = gui.add{
+        type = "frame",
+        name = "pdnd_stats",
+        direction = "vertical",
+        caption = "PDNC stats pages",
+        style = mod_gui.frame_style,
+    }
+    PDNCstats.style.horizontally_stretchable = false
+	PDNCstats.style.vertically_stretchable = false
+	gui_update(player)
 end
 
 local function get_sprite_button(player)
     local button_flow = mod_gui.get_button_flow(player)
-    local button = button_flow.doomsday_stats_button
-    if not button then
-        button = button_flow.add{
+    local doom = button_flow.doomsday_stats_button
+    if not doom then
+        doom = button_flow.add{
             type = "sprite-button",
             name = "doomsday_stats_button",
             sprite = "item/raw-fish",
             style = mod_gui.button_style,
-            tooltip = "Show debug stats for doomsday",
+            tooltip = "Debug stats for doomsday and PDNC",
         }
     end
-    
-    button.visible = true
+
+    --add admin check here
+    doom.visible = true
 end
 
 local function on_gui_click(event)
@@ -60,9 +126,18 @@ local function on_gui_click(event)
     if not (player and player.valid and gui and gui.valid) then
         return
     end
-    
+    --game.print(gui.name)
     if gui.name == "doomsday_stats_button" then
-        toggle_frame(player)
+   		toggle_frame(player)
+   		gui_update(player)
+    end
+    if gui.name == "doom_stat" then
+   		doom_stat(player)
+   		gui_update(player)
+    end
+    if gui.name == "pdnd_stat" then
+   		PDNC_stat(player)
+   		gui_update(player)
     end
 end
 
