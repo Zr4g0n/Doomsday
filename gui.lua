@@ -5,9 +5,7 @@ local function gui_update(player)
     local doomsday = gui.doom_stats
     local PDNC = gui.pdnd_stats
     local tab = gui.info_tab
-
-    -- text = pdnc_extended_status()
-    -- game.print(text)
+    
     if not doomsday then
         return
     end
@@ -135,12 +133,6 @@ local function get_sprite_button(player)
     end
     --add admin check here
     doom.visible = true
-     --    tab1 = tabp.add{type="tab", caption="tab1"}
-    	-- lable1 = tabp.add{type="label", caption="Label 1"}
-    	-- tabpanel = tabp.add_tab(tab1, lable1)
-    	-- tab2 = tabp.add{type="tab", caption="tab2"}
-    	-- lable2 = tabp.add{type="label", caption="Label 2"}
-    	-- tabpanel2 = tabp.add_tab(tab2, lable2)
 end
 
 local function on_gui_click(event)
@@ -149,7 +141,6 @@ local function on_gui_click(event)
     if not (player and player.valid and gui and gui.valid) then
         return
     end
-    --game.print(gui.name)
     if gui.name == "doomsday_stats_button" then
    		toggle_frame(player)
    		gui_update(player)
