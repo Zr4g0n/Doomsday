@@ -15,23 +15,22 @@ global.doomsday_use_different_spawn = true
 global.doomsday_different_spawn = {x = -2000, y = -500} 
 
 function doomsday_status()
-	game.print("Doomsday loaded!")
-	game.print("global.doomsday_start: " .. global.doomsday_start)
-	game.print("global.doomsday_pollution: " .. global.doomsday_pollution)
-	game.print("global.doomsday_surface: " .. global.doomsday_surface)
-	game.print("global.doomsday_enabled: " .. pdnc_bool_to_string(global.doomsday_enabled))
-	game.print("global.doomsday_enable_players_online_compensator: " .. pdnc_bool_to_string(global.doomsday_enable_players_online_compensator))
-	game.print("global.doomsday_current_fuzzy_playercount: " .. global.doomsday_current_fuzzy_playercount)
-	game.print("global.doomsday_use_early_death: " .. pdnc_bool_to_string(global.doomsday_use_early_death))
-	game.print("global.doomsday_early_death_has_happened: " .. pdnc_bool_to_string(global.doomsday_early_death_has_happened))
-	game.print("global.doomsday_use_different_spawn: " .. pdnc_bool_to_string(global.doomsday_use_different_spawn))
-	game.print("global.doomsday_different_spawn: x = " .. global.doomsday_different_spawn.x .. ", y = " .. global.doomsday_different_spawn.y)
-	--game.print(": " .. )
-	--game.print(": " .. )
-	--game.print(": " .. )
-	--game.print(": " .. )
-	--game.print(": " .. )
-	--game.print(": " .. )
+
+	stats = {
+		"Doomsday loaded!",
+		"Time Left: " .. doomsday_time_left(),
+		"global.doomsday_start: " .. global.doomsday_start,
+		"global.doomsday_pollution: " .. global.doomsday_pollution,
+		"global.doomsday_surface: " .. global.doomsday_surface,
+		"global.doomsday_enabled: " .. pdnc_bool_to_string(global.doomsday_enabled),
+		"global.doomsday_enable_players_online_compensator: " .. pdnc_bool_to_string(global.doomsday_enable_players_online_compensator),
+		"global.doomsday_current_fuzzy_playercount: " .. global.doomsday_current_fuzzy_playercount,
+		"global.doomsday_use_early_death: " .. pdnc_bool_to_string(global.doomsday_use_early_death),
+		"global.doomsday_early_death_has_happened: " .. pdnc_bool_to_string(global.doomsday_early_death_has_happened),
+		"global.doomsday_use_different_spawn: " .. pdnc_bool_to_string(global.doomsday_use_different_spawn),
+		"global.doomsday_different_spawn: x = " .. global.doomsday_different_spawn.x .. ", y = " .. global.doomsday_different_spawn.y,
+	}
+	return stats
 end
 
 function doomsday_toggle()
@@ -47,8 +46,8 @@ function doomsday_setup()
 end
 
 function doomsday_on_load()
-	commands.add_command("timeleft", "Gives you the time till doomsday!", doomsday_time_left)
-	commands.add_command("doomsday", "Prints doomsday status", doomsday_status)
+	-- commands.add_command("timeleft", "Gives you the time till doomsday!", doomsday_time_left)
+	-- commands.add_command("doomsday", "Prints doomsday status", doomsday_status)
 end
 
 function doomsday_early_death()
@@ -127,17 +126,17 @@ function doomsday_time_left()
 			local minutes = math.floor(seconds / 60)
 			local hours = math.floor(minutes / 60)
 			local days = math.floor(hours / 24)
-			game.print("time until doomsday: " .. string.format("%d:%02d:%02d", hours, minutes % 60, seconds % 60))
+			return("time until doomsday: " .. string.format("%d:%02d:%02d", hours, minutes % 60, seconds % 60))
 		else
 			ticks = ticks * -1 
 			local seconds = math.floor(ticks / 60)
 			local minutes = math.floor(seconds / 60)
 			local hours = math.floor(minutes / 60)
 			local days = math.floor(hours / 24)
-			game.print("Doomsday was: " .. string.format("%d:%02d:%02d", hours, minutes % 60, seconds % 60) .. " ago...")
+			return("Doomsday was: " .. string.format("%d:%02d:%02d", hours, minutes % 60, seconds % 60) .. " ago...")
 		end
 	else
-		game.print("Nothing to see here, move along! No doomsday here, nope!")
+		return("Nothing to see here, move along! No doomsday here, nope!")
 	end
 end
 
@@ -176,6 +175,33 @@ function reduce_brightness(n)
 end	
 ]]
 
+local doomsday_init = {}
+
+doomsday_init.on_nth_ticks = {
+
+}
+
+doomsday_init.on_init = function() 
+    game.print("doomsday Init")
+    global.doomsday_data = global.doomsday_data or script_data -- NO TOUCHY
+    doomsday_setup()
+end
+
+doomsday_init.on_load = function()
+    game.print("doomsday load")
+    script_data = global.doomsday_data or script_data  -- NO TOUCHY
+    doomsday_on_load()
+end
+
+local script_events = {
+
+}
+
+doomsday_init.get_events = function()
+    return script_events
+end
+
+return doomsday_init
 
 --Event.register(-global.pdnc_stepsize, doomsday_pdnc_program) --intentionally using the PDNC stepsize so the functions sync this can be skipped, since it's called from pdnc!
 --Event.register(Event.core_events.init, doomsday_setup)
