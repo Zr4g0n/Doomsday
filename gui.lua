@@ -87,21 +87,43 @@ local function on_gui_tick(event)
 	gui_update_all()
 end
 
+
+
 local doomsdaygui_init = {}
 
-doomsdaygui_init.on_nth_ticks = {
-    [60] = on_gui_tick,
-}
-
-doomsdaygui_init.on_init = function()
-    log("Doomsday GUI init")
-    global.poseidon_data = global.poseidon_data or script_data
-end
-
 local script_events = {
+    --place the here what you would normaly use Event.register for
+    -- Event.register(defines.events.on_player_created, testfunction)
+    -- is the same as 
+    -- [defines.events.on_player_created] = testfunction,
+    -- where testfunction is | local functuin testfunction() { }
+    --[Event] = function, 
+    --put stuff here
     [defines.events.on_gui_click] = on_gui_click,
     [defines.events.on_player_created] = on_player_created,
 }
+
+doomsdaygui_init.on_nth_ticks = {
+    --place the here what you would normaly use 
+    --[tick] = function,
+    --put stuff here
+    [60] = on_gui_tick,
+}
+
+doomsdaygui_init.on_init = function() -- this runs when Event.core_events.init
+    log("doomsdaygui init")
+    --put stuff here
+
+    global.doomsdaygui_data = global.doomsdaygui_data or script_data  -- NO TOUCHY
+
+end
+
+doomsdaygui_init.on_load = function() -- this runs when Event.core_events.load
+    log("doomsdaygui load")
+    --put stuff here
+
+    script_data = global.doomsdaygui_data or script_data  -- NO TOUCHY
+end
 
 doomsdaygui_init.get_events = function()
     return script_events
