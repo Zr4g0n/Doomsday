@@ -4,8 +4,8 @@
 require("pdnc") --is this the best way to do this?
 global.doomsday_enabled = true
 global.doomsday = global.doomsday or {} -- used to check if this exists. 
-global.doomsday_start = 17.75 -- in ingame days. Use n.75 to make sure doomsday is at midnight. 
-global.doomsday_pollution = 200000 -- amount to be applied per tick
+global.doomsday_start = 7.75 -- in ingame days. Use n.75 to make sure doomsday is at midnight. 
+global.doomsday_pollution = 2000 -- amount to be applied per tick
 global.doomsday_surface = 1
 global.doomsday_enable_players_online_compensator = false
 global.doomsday_current_fuzzy_playercount = 1.5 -- start assuming 1.5 players! :V
@@ -64,6 +64,8 @@ function doomsday_activate_different_spawn()
 end
 
 function doomsday_core()
+	local x = current_time * 6.2831853 --2pi
+	local returnvalue = 0
 	if(global.doomsday_enable_players_online_compensator)then
 		doomsday_players_online_compensator()
 	end
@@ -78,24 +80,28 @@ function doomsday_core()
 	
 	local x = current_time * 6.2831853 --2pi
 	local returnvalue = 0
-	local radius = 512 --make global
-	local pollution = global.doomsday_pollution -- total pollution applied per tick
-	local nodes = 16 -- the number of nodes to spread
 	if (current_time < global.doomsday_start) then
 		returnvalue = math.pow(pdnc_c_boxy(x), (1 + current_time / 4))
 		-- days become darker over time towards n^6.125
 	elseif (current_time < global.doomsday_start + 1) then
-		--global.pdnc_enable_brightness_limit = false
-		returnvalue = math.pow(((global.doomsday_start + 1) - current_time), 7)
-		doomsday_pollute(radius*0.66,pollution,9)
-		doomsday_pollute(radius*1.00,pollution,17)
-		doomsday_pollute(radius*1.50,pollution,27)
+		returnvalue = doomsday_pollution_zero_hour(current_time)
 	else
 		global.pdnc_enable_brightness_limit = true
 		returnvalue = math.pow(pdnc_c_boxy(x), 6.125)--*0.5
 	end
 	return pdnc_scaler(returnvalue)
 end
+
+function doomsday_pollution_zero_hour(current_time)
+	local radius = 256 --make global
+	local pollution = global.doomsday_pollution -- total pollution applied per tick
+	local nodes = 7 -- the number of nodes to spread
+	doomsday_pollute(radius*0.66,pollution,nodes*0.66)
+	doomsday_pollute(radius*1.00,pollution,nodes*1.00)
+	doomsday_pollute(radius*1.50,pollution,nodes*1.50)
+	return math.pow(((global.doomsday_start + 1) - current_time), 7)
+end
+
 
 function doomsday_normal_curve(x)
 	return (1+ ((math.sin(x) + (0.111 * math.sin(3 * x))) * 1.124859392575928))/2
