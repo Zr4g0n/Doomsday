@@ -1,3 +1,8 @@
+--[[
+HUGE SHOUTOUT TO HORNWITSER FOR WRITING THIS SEXY AS MODLOADER <3 
+and for not getting mad when i coppyed it :)
+]]
+
 local modules = {
     require("silo-script"),
     require("pdnc"),
