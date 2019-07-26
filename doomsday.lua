@@ -94,11 +94,11 @@ end
 
 function doomsday_pollution_zero_hour(current_time)
 	local radius = 256 --make global
-	local pollution = global.doomsday_pollution*global.pdnc_stepsize -- multiplying by tickrate keeps the pollution-value per tick stable at different tickrates. 
+	local pollution = global.doomsday_pollution -- total pollution applied per tick
 	local nodes = 7 -- the number of nodes to spread
-	doomsday_pollute(radius*0.66,pollution/3,nodes*0.66)
-	doomsday_pollute(radius*1.00,pollution/3,nodes*1.00)
-	doomsday_pollute(radius*1.50,pollution/3,nodes*1.50)
+	doomsday_pollute(radius*0.66,pollution,nodes*0.66)
+	doomsday_pollute(radius*1.00,pollution,nodes*1.00)
+	doomsday_pollute(radius*1.50,pollution,nodes*1.50)
 	return math.pow(((global.doomsday_start + 1) - current_time), 7)
 end
 
@@ -108,12 +108,12 @@ function doomsday_normal_curve(x)
 	-- magic numbers to make it scale to (-1, 1)
 end
 
-function doomsday_pollute(radius,pollution,nodes) -- spawn a ring of pollution based on radius, amount of pollution and number of points in the ring.
-	pollution = pollution / nodes
+function doomsday_pollute(radius,pollution,nodes) -- spawn a ring of pollution based on radius, amount of pollution and number of points in the ring. 
+	local p = global.pdnc_stepsize * pollution -- needed to make it 'step size independant'
+	p = p / nodes
+	local position = {x = 0.0, y = 0.0}
 	if global.doomsday_use_different_spawn then
-		local position = global.doomsday_different_spawn
-	else 
-		local position = {x = 0.0, y = 0.0}
+		position = global.doomsday_different_spawn
 	end
 	game.surfaces[global.doomsday_surface].pollute(position, p) --circle + center point
 	local step = (math.pi * 2) / (nodes - 1)
