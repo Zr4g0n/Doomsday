@@ -26,15 +26,9 @@ global.pdnc_min_per_day = 0.1
 
 function pdnc_setup()
 	--game.surfaces[global.pdnc_surface].ticks_per_day = pdnc_min_to_ticks(10.0)
-	pdnc_on_load()
 	doomsday_setup()
 end
 
-function pdnc_on_load()
-	commands.add_command("pdnc", "gives PDNC's status", pdnc_print_status)
-	commands.add_command("pdnc_toggle", "toggles pdnc", pdnc_toggle)
-	commands.add_command("pdnc_toggle_debug", "toggles pdnc debug mode", pdnc_toggle_debug)
-	commands.add_command("pdnc_disable_and_reset", "Disabled pdnc and resets the dnc to the vanilla default", pdnc_disable_and_reset)
 end
 
 function pdnc_toggle_debug()
@@ -274,10 +268,16 @@ PDNC_init.on_nth_ticks = {
 	[global.pdnc_stepsize] = pdnc_core,
 }
 
+PDNC_init.add_commands = function()
+	commands.add_command("pdnc", "gives PDNC's status", pdnc_print_status)
+	commands.add_command("pdnc_toggle", "toggles pdnc", pdnc_toggle)
+	commands.add_command("pdnc_toggle_debug", "toggles pdnc debug mode", pdnc_toggle_debug)
+	commands.add_command("pdnc_disable_and_reset", "Disabled pdnc and resets the dnc to the vanilla default", pdnc_disable_and_reset)
+end
+
 PDNC_init.on_init = function() -- this runs when Event.core_events.init
 	log("PDNC init")
 	--put stuff here
-	pdnc_on_load()
 	global.PDNC_data = global.PDNC_data or script_data  -- NO TOUCHY
 
 end
@@ -295,6 +295,3 @@ PDNC_init.get_events = function()
 end
 
 return PDNC_init
-
---script.on_load(pdnc_on_load())
--- on init and on load, run: pdnc_on_load() doomsday_on_load()
