@@ -147,7 +147,8 @@ function doomsday_time_left()
 end
 
 function doomsday_time_left_with_ticks()
-	return doomsday_time_left() .. ":" .. (((game.surfaces[global.doomsday_surface].ticks_per_day * global.doomsday_start) - game.tick)%60)
+	local tick = (((game.surfaces[global.doomsday_surface].ticks_per_day * global.doomsday_start) - game.tick)%60)
+	return doomsday_time_left() .. ":" .. string.format("%02d", tick)
 end
 
 function doomsday_players_online_compensator()
