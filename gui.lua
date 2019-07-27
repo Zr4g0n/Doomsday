@@ -127,8 +127,10 @@ local function gui_update_counter(player)
     frame_counter.clear()
     frame_counter.add{
         type = "label",
-        caption = doomsday_time_left()
+        caption = doomsday_time_left_with_ticks()
     }
+    frame_counter.location = {player.display_resolution.width/2 - 40, 10}
+    frame_counter.visible = true
 end
 
 local function toggle_frame_counter(player)
@@ -147,17 +149,10 @@ local function toggle_frame_counter(player)
         --caption = "Doomsday counter",
         style = mod_gui.frame_style,
     }
-    frame_counter.visible = true
 
-    game.print("display width: " .. player.display_resolution.width)
-    game.print("display height: " .. player.display_resolution.height)
-    game.print("screen center: " .. player.display_resolution.width .. " " .. player.display_resolution.height)
-    --frame_counter.location = {0, 0}
-    frame_counter.location = {player.display_resolution.width/2, player.display_resolution.height/2}
-    -- frame_counter.auto_center = true
-    
     --frame_counter.style.horizontally_stretchable = false
     frame_counter.style.vertically_stretchable = false
+    frame_counter.visible = false
     gui_update_counter(player)
 end
 
@@ -222,7 +217,7 @@ doomsdaygui_init.on_nth_ticks = {
     --place the here what you would normaly use 
     --[tick] = function,
     --put stuff here
-    [60] = on_gui_tick,
+    [1] = on_gui_tick,
 }
 
 doomsdaygui_init.on_init = function() -- this runs when Event.core_events.init
