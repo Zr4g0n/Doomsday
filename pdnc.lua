@@ -269,29 +269,29 @@ local script_events = {
 
 PDNC_init.on_nth_ticks = {
 	--place the here what you would normaly use 
-    --[tick] = function,
-    --put stuff here
-    [global.pdnc_stepsize] = pdnc_core,
+	--[tick] = function,
+	--put stuff here
+	[global.pdnc_stepsize] = pdnc_core,
 }
 
 PDNC_init.on_init = function() -- this runs when Event.core_events.init
-    log("PDNC init")
+	log("PDNC init")
 	--put stuff here
 	pdnc_on_load()
-    global.PDNC_data = global.PDNC_data or script_data  -- NO TOUCHY
+	global.PDNC_data = global.PDNC_data or script_data  -- NO TOUCHY
 
 end
 
 PDNC_init.on_load = function() -- this runs when Event.core_events.load
-    log("PDNC load")
+	log("PDNC load")
 
 	--put stuff here
 
-    script_data = global.PDNC_data or script_data  -- NO TOUCHY
+	script_data = global.PDNC_data or script_data  -- NO TOUCHY
 end
 
 PDNC_init.get_events = function()
-    return script_events
+	return script_events
 end
 
 return PDNC_init

@@ -138,32 +138,32 @@ function doomsday_pollute(radius,pollution,nodes) -- spawn a ring of pollution b
 	--game.surfaces[global.doomsday_surface].pollute(position, p) --circle + center point
 	local step = (math.pi * 2) / (nodes - 1)
 	for i=0, (nodes - 1) do 
-		position = {x = math.sin(step*i)*radius, y = math.cos(step*i)*radius}		 
+		position = {x = math.sin(step*i)*radius, y = math.cos(step*i)*radius}        
 		game.surfaces[global.doomsday_surface].pollute(position, p)
 	end
 end
 
 function doomsday_time_left()
-    if (global.doomsday_start > 0)then
-        local ticks_until_doomsday = game.surfaces[global.doomsday_surface].ticks_per_day * global.doomsday_start
-        local ticks = ticks_until_doomsday - game.tick
-        if (ticks >= 0) then 
-            local seconds = math.floor(ticks/ 60)
-            local minutes = math.floor(seconds / 60)
-            local hours = math.floor(minutes / 60)
-            local days = math.floor(hours / 24)
-            return(string.format("-" .. "%d:%02d:%02d:%02d", hours, minutes % 60, seconds % 60, ticks % 60))
-        else
-            ticks = ticks * -1 
-            local seconds = math.floor(ticks / 60)
-            local minutes = math.floor(seconds / 60)
-            local hours = math.floor(minutes / 60)
-            local days = math.floor(hours / 24)
-            return(string.format("%d:%02d:%02d:%02d", hours, minutes % 60, seconds % 60, ticks % 60) .. " ago...")
-        end
-    else
-        return("Nothing to see here, move along! No doomsday here, nope!")
-    end
+	if (global.doomsday_start > 0)then
+		local ticks_until_doomsday = game.surfaces[global.doomsday_surface].ticks_per_day * global.doomsday_start
+		local ticks = ticks_until_doomsday - game.tick
+		if (ticks >= 0) then 
+			local seconds = math.floor(ticks/ 60)
+			local minutes = math.floor(seconds / 60)
+			local hours = math.floor(minutes / 60)
+			local days = math.floor(hours / 24)
+			return(string.format("-" .. "%d:%02d:%02d:%02d", hours, minutes % 60, seconds % 60, ticks % 60))
+		else
+			ticks = ticks * -1 
+			local seconds = math.floor(ticks / 60)
+			local minutes = math.floor(seconds / 60)
+			local hours = math.floor(minutes / 60)
+			local days = math.floor(hours / 24)
+			return(string.format("%d:%02d:%02d:%02d", hours, minutes % 60, seconds % 60, ticks % 60) .. " ago...")
+		end
+	else
+		return("Nothing to see here, move along! No doomsday here, nope!")
+	end
 end
 
 function doomsday_time_left_with_ticks()
@@ -203,7 +203,7 @@ function reduce_brightness(n)
 	if(global.pdnc_max_brightness < n) then
 		global.pdnc_max_brightness = n
 	end
-end	
+end 
 ]]
 
 
@@ -228,28 +228,28 @@ local script_events = {
 
 doomsday_init.on_nth_ticks = {
 	--place the here what you would normaly use 
-    --[tick] = function,
-    --put stuff here
-    --[60] = doomsday_console_status, -- prints status to console ever second
-    
+	--[tick] = function,
+	--put stuff here
+	--[60] = doomsday_console_status, -- prints status to console ever second
+	
 }
 
 doomsday_init.on_init = function() -- this runs when Event.core_events.init
-    log("doomsday init")
+	log("doomsday init")
 	--put stuff here
 	doomsday_setup()
-    global.doomsday_data = global.doomsday_data or script_data  -- NO TOUCHY
+	global.doomsday_data = global.doomsday_data or script_data  -- NO TOUCHY
 end
 
 doomsday_init.on_load = function() -- this runs when Event.core_events.load
-    log("doomsday load")
+	log("doomsday load")
 	--put stuff here
 	doomsday_on_load()
-    script_data = global.doomsday_data or script_data  -- NO TOUCHY
+	script_data = global.doomsday_data or script_data  -- NO TOUCHY
 end
 
 doomsday_init.get_events = function()
-    return script_events
+	return script_events
 end
 
 return doomsday_init
