@@ -22,7 +22,7 @@ global.pdnc_enable_rocket_darkness = false
 global.pdnc_rockets_launched = 0
 global.pdnc_rockets_launched_step_size = 0.025
 global.pdnc_rockets_launched_smooth = 0
-global.pdnc_min_per_day = 17.0
+global.pdnc_min_per_day = 0.1
 
 function pdnc_setup()
 	--game.surfaces[global.pdnc_surface].ticks_per_day = pdnc_min_to_ticks(10.0)
@@ -89,6 +89,7 @@ end
 
 function pdnc_core()
 	if(global.pdnc_enabled)then
+		doomsday_core()
 		local current_surface = game.surfaces[global.pdnc_surface]
 		pdnc_freeze_check(current_surface)
 		current_surface.ticks_per_day = pdnc_min_to_ticks(global.pdnc_min_per_day) -- move this somewhere else; doesn't need to run every nth tick!

@@ -1,7 +1,7 @@
 local mod_gui = require 'mod-gui'
 
 -- ADDS DOOMSDAY STATS BUTTON
-local function gui_update(player)
+local function gui_update_DOOM(player)
     local gui = mod_gui.get_frame_flow(player)
     local frame = gui.doomsday_stats
     if not frame then
@@ -17,7 +17,7 @@ local function gui_update(player)
 	end
 end
 
-local function toggle_frame(player)
+local function toggle_frame_DOOM(player)
     local gui = mod_gui.get_frame_flow(player)
     local frame = gui.doomsday_stats
     
@@ -36,25 +36,20 @@ local function toggle_frame(player)
     
     frame.style.horizontally_stretchable = false
     frame.style.vertically_stretchable = false
-    gui_update(player)
+    gui_update_DOOM(player)
 end
 
-local function get_sprite_button(player)
+local function get_sprite_button_DOOM(player)
     local button_flow = mod_gui.get_button_flow(player)
-    local button = button_flow.doomsday_stats_button
+    button_DOOM = button_flow.doomsday_stats_button
     if not button then
-        button = button_flow.add{
+        button_DOOM = button_flow.add{
             type = "sprite-button",
             name = "doomsday_stats_button",
             sprite = "item/raw-fish",
             style = mod_gui.button_style,
             tooltip = "Show debug stats for doomsday",
         }
-    end
-    if player.admin == true then
-        button.visible = true
-    else
-        button.visible = false
     end
 end
 
@@ -99,20 +94,15 @@ end
 
 local function get_sprite_button_PDNC(player)
     local button_flow = mod_gui.get_button_flow(player)
-    local button = button_flow.PDNC_stats_button
+    local button_PDNC = button_flow.PDNC_stats_button
     if not button then
-        button = button_flow.add{
+        button_PDNC = button_flow.add{
             type = "sprite-button",
             name = "PDNC_stats_button",
             sprite = "item/raw-fish",
             style = mod_gui.button_style,
             tooltip = "Show debug stats for PDNC",
         }
-    end
-    if player.admin == true then
-        button.visible = true
-    else
-        button.visible = false
     end
 end
 
@@ -127,7 +117,7 @@ local function gui_update_counter(player)
     frame_counter.clear()
     frame_counter.add{
         type = "label",
-        caption = doomsday_time_left_with_ticks()
+        caption = doomsday_time_left()
     }
     frame_counter.location = {player.display_resolution.width/2 - 59, 10}
     frame_counter.visible = true
@@ -165,7 +155,7 @@ local function on_gui_click(event)
     end
     
     if gui.name == "doomsday_stats_button" then
-        toggle_frame(player)
+        toggle_frame_DOOM(player)
     end
     if gui.name == "PDNC_stats_button" then
         toggle_frame_PDNC(player)
@@ -178,7 +168,7 @@ local function on_player_created(event)
         return
     end
     
-    get_sprite_button(player)
+    get_sprite_button_DOOM(player)
     get_sprite_button_PDNC(player)
     toggle_frame_counter(player)
 end
@@ -186,9 +176,9 @@ end
 local function gui_update_all()
     for _, player in pairs(game.players) do
         if player and player.valid then
-            gui_update(player)
-            gui_update_counter(player)
+            gui_update_DOOM(player)
             gui_update_PDNC(player)
+            gui_update_counter(player)  
         end
     end
 end
@@ -197,10 +187,7 @@ local function on_gui_tick(event)
 	gui_update_all()
 end
 
-
-
 local doomsdaygui_init = {}
-
 local script_events = {
     --place the here what you would normaly use Event.register for
     -- Event.register(defines.events.on_player_created, testfunction)
