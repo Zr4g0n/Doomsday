@@ -56,15 +56,9 @@ function doomsday_toggle()
 end
 
 function doomsday_setup()
-	doomsday_on_load()
 	if global.doomsday_use_different_spawn then
 		doomsday_activate_different_spawn()
 	end
-end
-
-function doomsday_on_load()
-	-- commands.add_command("timeleft", "Gives you the time till doomsday!", doomsday_time_left)
-	-- commands.add_command("doomsday", "Prints doomsday status", doomsday_status)
 end
 
 function doomsday_early_death()
@@ -244,7 +238,6 @@ end
 doomsday_init.on_load = function() -- this runs when Event.core_events.load
 	log("doomsday load")
 	--put stuff here
-	doomsday_on_load()
 	script_data = global.doomsday_data or script_data  -- NO TOUCHY
 end
 
@@ -256,4 +249,3 @@ return doomsday_init
 
 --Event.register(-global.pdnc_stepsize, doomsday_pdnc_program) --intentionally using the PDNC stepsize so the functions sync this can be skipped, since it's called from pdnc!
 --Event.register(Event.core_events.init, doomsday_setup)
---Event.register(Event.core_events.load, doomsday_on_load)
