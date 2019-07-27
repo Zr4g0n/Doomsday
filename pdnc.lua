@@ -63,17 +63,20 @@ function pdnc_print_status()
 end
 
 function pdnc_extended_status()
-	game.print("global.pdnc_stepsize: " .. global.pdnc_stepsize)
-	game.print("global.pdnc_surface: " .. global.pdnc_surface)
-	game.print("global.pdnc_current_time: " .. global.pdnc_current_time)
-	game.print("global.pdnc_max_brightness: " .. global.pdnc_max_brightness)
-	game.print("global.pdnc_enable_brightness_limit: " .. pdnc_bool_to_string(global.pdnc_enable_brightness_limit))
-	game.print("global.pdnc_enable_rocket_darkness: " .. pdnc_bool_to_string(global.pdnc_enable_rocket_darkness))
-	game.print("global.pdnc_rockets_launched: " .. global.pdnc_rockets_launched)
-	game.print("global.pdnc_rockets_launched_step_size: " .. global.pdnc_rockets_launched_step_size)
-	game.print("global.pdnc_rockets_launched_smooth: " .. global.pdnc_rockets_launched_smooth)
-	game.print("ticks per day: " .. game.surfaces[global.pdnc_surface].ticks_per_day)
-	game.print("current tick: " .. game.tick)
+	stats = {
+		"global.pdnc_stepsize: " .. global.pdnc_stepsize,
+		"global.pdnc_surface: " .. global.pdnc_surface,
+		"global.pdnc_current_time: " .. global.pdnc_current_time,
+		"global.pdnc_max_brightness: " .. global.pdnc_max_brightness,
+		"global.pdnc_enable_brightness_limit: " .. pdnc_bool_to_string(global.pdnc_enable_brightness_limit),
+		"global.pdnc_enable_rocket_darkness: " .. pdnc_bool_to_string(global.pdnc_enable_rocket_darkness),
+		"global.pdnc_rockets_launched: " .. global.pdnc_rockets_launched,
+		"global.pdnc_rockets_launched_step_size: " .. global.pdnc_rockets_launched_step_size,
+		"global.pdnc_rockets_launched_smooth: " .. global.pdnc_rockets_launched_smooth,
+		"ticks per day: " .. game.surfaces[global.pdnc_surface].ticks_per_day,
+		"current tick: " .. game.tick,
+	}
+	return stats
 end
 
 function pdnc_bool_to_string(b)
@@ -273,13 +276,14 @@ PDNC_init.on_nth_ticks = {
 PDNC_init.on_init = function() -- this runs when Event.core_events.init
     log("PDNC init")
 	--put stuff here
-
+	pdnc_on_load()
     global.PDNC_data = global.PDNC_data or script_data  -- NO TOUCHY
 
 end
 
 PDNC_init.on_load = function() -- this runs when Event.core_events.load
     log("PDNC load")
+
 	--put stuff here
 
     script_data = global.PDNC_data or script_data  -- NO TOUCHY
