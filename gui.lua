@@ -1,4 +1,5 @@
 local mod_gui = require 'mod-gui'
+
 -- ADDS DOOMSDAY STATS BUTTON
 local function gui_update(player)
     local gui = mod_gui.get_frame_flow(player)
@@ -117,7 +118,7 @@ end
 
 -- ADDS DOOMSDAY TIME LEFT COUNTER
 local function gui_update_counter(player)
-    local gui = mod_gui.get_frame_flow(player)
+    local gui = player.gui.screen --mod_gui.get_frame_flow(player)
     local frame_counter = gui.doomsday_counter
     if not frame_counter then
         return
@@ -131,12 +132,13 @@ local function gui_update_counter(player)
 end
 
 local function toggle_frame_counter(player)
-    local gui = mod_gui.get_frame_flow(player)
+    --local player = player
+    local gui = player.gui.screen --mod_gui.get_frame_flow(player)
     local frame_counter = gui.doomsday_counter
-    if frame_counter then
-        frame_counter.destroy()
-        return
-    end
+    -- if frame_counter then
+    --     frame_counter.destroy()
+    --     return
+    -- end
     
     frame_counter = gui.add{
         type = "frame",
@@ -146,9 +148,16 @@ local function toggle_frame_counter(player)
         style = mod_gui.frame_style,
     }
     frame_counter.visible = true
+
+    game.print("display width: " .. player.display_resolution.width)
+    game.print("display height: " .. player.display_resolution.height)
+    game.print("screen center: " .. player.display_resolution.width .. " " .. player.display_resolution.height)
+    --frame_counter.location = {0, 0}
+    frame_counter.location = {player.display_resolution.width/2, player.display_resolution.height/2}
+    -- frame_counter.auto_center = true
     
     --frame_counter.style.horizontally_stretchable = false
-    --frame_counter.style.vertically_stretchable = false
+    frame_counter.style.vertically_stretchable = false
     gui_update_counter(player)
 end
 
