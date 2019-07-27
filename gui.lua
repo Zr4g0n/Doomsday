@@ -42,7 +42,12 @@ end
 local function get_sprite_button_DOOM(player)
 	local button_flow = mod_gui.get_button_flow(player)
 	button_DOOM = button_flow.doomsday_stats_button
-	if not button then
+
+	if button_DOOM then
+		button_DOOM.destroy()
+	end
+
+	if player.admin then
 		button_DOOM = button_flow.add{
 			type = "sprite-button",
 			name = "doomsday_stats_button",
@@ -95,7 +100,12 @@ end
 local function get_sprite_button_PDNC(player)
 	local button_flow = mod_gui.get_button_flow(player)
 	local button_PDNC = button_flow.PDNC_stats_button
-	if not button then
+
+	if button_PDNC then
+		button_PDNC.destroy()
+	end
+
+	if player.admin then
 		button_PDNC = button_flow.add{
 			type = "sprite-button",
 			name = "PDNC_stats_button",
@@ -146,6 +156,32 @@ local function toggle_frame_counter(player)
 	gui_update_counter(player)
 end
 
+local function update_buttons(event)
+	local player = game.players[event.player_index]
+	if not (player and player.valid) then
+		return
+	end
+
+	get_sprite_button_DOOM(player)
+	get_sprite_button_PDNC(player)
+
+	-- Make sure the frames are not visible to players
+	if not player.admin then
+		local gui = mod_gui.get_frame_flow(player)
+		local frame_PDNC = gui.PDNC_stats
+		
+		if frame_PDNC then
+			frame_PDNC.destroy()
+		end
+
+		local frame_DOOM = gui.doomsday_stats
+		
+		if frame_DOOM then
+			frame_DOOM.destroy()
+		end
+	end
+end
+
 -- ON GUI CLICK AND OTHERS
 local function on_gui_click(event)
 	local gui = event.element
@@ -168,8 +204,7 @@ local function on_player_created(event)
 		return
 	end
 	
-	get_sprite_button_DOOM(player)
-	get_sprite_button_PDNC(player)
+	update_buttons(event)
 	toggle_frame_counter(player)
 end
 
@@ -198,6 +233,8 @@ local script_events = {
 	--put stuff here
 	[defines.events.on_gui_click] = on_gui_click,
 	[defines.events.on_player_created] = on_player_created,
+	[defines.events.on_player_promoted] = update_buttons,
+	[defines.events.on_player_demoted] = update_buttons,
 }
 
 doomsdaygui_init.on_nth_ticks = {
