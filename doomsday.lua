@@ -12,7 +12,8 @@ global.doomsday_current_fuzzy_playercount = 1.5 -- start assuming 1.5 players! :
 global.doomsday_use_early_death = true
 global.doomsday_early_death_has_happened = false
 global.doomsday_use_different_spawn = true
-global.doomsday_different_spawn = {x = -2000, y = -500} 
+global.doomsday_different_spawn = {x = -2000, y = -500}
+global.doomsday_has_happened = false 
 
 function doomsday_status()
 	stats = {
@@ -99,6 +100,10 @@ function doomsday_core()
 		-- days become darker over time towards n^6.125
 	elseif (current_time < global.doomsday_start + 1) then
 		returnvalue = doomsday_pollution_zero_hour(current_time)
+		if not global.doomsday_has_happened then
+			global.doomsday_has_happened = true
+			log("Doomsday activated at tick:" .. game.tick)
+		end
 	else
 		global.pdnc_enable_brightness_limit = true
 		returnvalue = math.pow(pdnc_c_boxy(x), 6.125)--*0.5
