@@ -129,7 +129,7 @@ local function gui_update_counter(player)
         type = "label",
         caption = doomsday_time_left_with_ticks()
     }
-    frame_counter.location = {player.display_resolution.width/2 - 40, 10}
+    frame_counter.location = {player.display_resolution.width/2 - 59, 10}
     frame_counter.visible = true
 end
 

@@ -15,9 +15,7 @@ global.doomsday_use_different_spawn = true
 global.doomsday_different_spawn = {x = -2000, y = -500} 
 
 function doomsday_status()
-
 	stats = {
-		"Doomsday loaded!",
 		"Time Left: " .. doomsday_time_left(),
 		"global.doomsday_start: " .. global.doomsday_start,
 		"global.doomsday_pollution: " .. global.doomsday_pollution,
@@ -30,6 +28,22 @@ function doomsday_status()
 		"global.doomsday_use_different_spawn: " .. pdnc_bool_to_string(global.doomsday_use_different_spawn),
 		"global.doomsday_different_spawn: x = " .. global.doomsday_different_spawn.x .. ", y = " .. global.doomsday_different_spawn.y,
 	}
+	return stats
+end
+
+function doomsday_console_status()
+		--logs to console, used for debuging
+		log("Time Left: " .. doomsday_time_left())
+		log("global.doomsday_start: " .. global.doomsday_start)
+		log("global.doomsday_pollution: " .. global.doomsday_pollution)
+		log("global.doomsday_surface: " .. global.doomsday_surface)
+		log("global.doomsday_enabled: " .. pdnc_bool_to_string(global.doomsday_enabled))
+		log("global.doomsday_enable_players_online_compensator: " .. pdnc_bool_to_string(global.doomsday_enable_players_online_compensator))
+		log("global.doomsday_current_fuzzy_playercount: " .. global.doomsday_current_fuzzy_playercount)
+		log("global.doomsday_use_early_death: " .. pdnc_bool_to_string(global.doomsday_use_early_death))
+		log("global.doomsday_early_death_has_happened: " .. pdnc_bool_to_string(global.doomsday_early_death_has_happened))
+		log("global.doomsday_use_different_spawn: " .. pdnc_bool_to_string(global.doomsday_use_different_spawn))
+		log("global.doomsday_different_spawn: x = " .. global.doomsday_different_spawn.x .. ", y = " .. global.doomsday_different_spawn.y)
 	return stats
 end
 
@@ -115,9 +129,10 @@ function doomsday_pollute(radius,pollution,nodes) -- spawn a ring of pollution b
 	if global.doomsday_use_different_spawn then
 		position = global.doomsday_different_spawn
 	end
-	game.surfaces[global.doomsday_surface].pollute(position, p) --circle + center point
+	--game.surfaces[global.doomsday_surface].pollute(position, p) --circle + center point
 	local step = (math.pi * 2) / (nodes - 1)
 	for i=0, (nodes - 1) do 
+		doomsday_console_status()
 		position = {x = math.sin(step*i)*radius, y = math.cos(step*i)*radius}		 
 		game.surfaces[global.doomsday_surface].pollute(position, p)
 	end
@@ -210,7 +225,15 @@ doomsday_init.on_nth_ticks = {
 	--place the here what you would normaly use 
     --[tick] = function,
     --put stuff here
+    [6000] = doomsday_console_status,
     
+}
+
+doomsday_init.raise_event = {
+	--place the here what you would normaly use 
+    --[tick] = function,
+    --put stuff here
+    [global.pdnc_stepsize] = pdnc_core,
 }
 
 doomsday_init.on_init = function() -- this runs when Event.core_events.init
