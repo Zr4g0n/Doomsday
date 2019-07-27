@@ -29,30 +29,41 @@ function pdnc_setup()
 	doomsday_setup()
 end
 
+-- Returns true if the player is an admin
+function check_admin(ctx)
+	local player = game.players[ctx.player_index]
+	if not player.admin then
+		player.print("Only admins can use /"..ctx.name)
+		return false
+	end
+	return true
 end
 
-function pdnc_toggle_debug()
+function pdnc_toggle_debug(ctx)
+	if not check_admin(ctx) then return end
 	global.pdnc_debug = not global.pdnc_debug
-	pdnc_print_status()
+	pdnc_print_status(ctx)
 end
 
-function pdnc_toggle()
+function pdnc_toggle(ctx)
+	if not check_admin(ctx) then return end
 	global.pdnc_enabled = not global.pdnc_enabled
-	pdnc_print_status()
+	pdnc_print_status(ctx)
 end
 
-function pdnc_print_status()
+function pdnc_print_status(ctx)
+	local player = game.players[ctx.player_index]
 	if(global.pdnc_enabled)then
-		game.print("PDNC is enabled")
+		player.print("PDNC is enabled")
 	else
-		game.print("PDNC is disabled")
+		player.print("PDNC is disabled")
 	end
 	
 	if(global.pdnc_debug)then
-		game.print("PDNC debug is enabled")
+		player.print("PDNC debug is enabled")
 		pdnc_extended_status()
 	else
-		game.print("PDNC debug is disabled")
+		player.print("PDNC debug is disabled")
 	end
 end
 
@@ -133,7 +144,8 @@ function pdnc_cleanup_last_tick(current_surface)
 	current_surface.morning = 999999999998
 end
 
-function pdnc_disable_and_reset()
+function pdnc_disable_and_reset(ctx)
+	if not check_admin(ctx) then return end
 	local current_surface = game.surfaces[global.pdnc_surface]
 	pdnc_cleanup_last_tick(current_surface)
 	-- DO NOT CHANGE THIS ORDER! 
