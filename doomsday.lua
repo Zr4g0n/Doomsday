@@ -132,7 +132,7 @@ function doomsday_time_left()
 			local minutes = math.floor(seconds / 60)
 			local hours = math.floor(minutes / 60)
 			local days = math.floor(hours / 24)
-			return(string.format("%d:%02d:%02d", hours, minutes % 60, seconds % 60))
+			return(string.format("-" .. "%d:%02d:%02d", hours, minutes % 60, seconds % 60))
 		else
 			ticks = ticks * -1 
 			local seconds = math.floor(ticks / 60)
@@ -144,6 +144,10 @@ function doomsday_time_left()
 	else
 		return("Nothing to see here, move along! No doomsday here, nope!")
 	end
+end
+
+function doomsday_time_left_with_ticks()
+	return doomsday_time_left() .. ":" .. ((ticks_until_doomsday - game.tick)%60)
 end
 
 function doomsday_players_online_compensator()
