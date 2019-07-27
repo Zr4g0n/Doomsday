@@ -16,13 +16,13 @@ global.pdnc_current_time = 0
 global.pdnc_current_point = {x = 0, y = 1.0}
 global.pdnc_last_point = {x = -1, y = 0.0}
 global.pdnc_max_brightness = 0.5 -- for clusterio
-global.pdnc_debug = true
+global.pdnc_debug = false
 global.pdnc_enable_brightness_limit = false
 global.pdnc_enable_rocket_darkness = false
 global.pdnc_rockets_launched = 0
 global.pdnc_rockets_launched_step_size = 0.025
 global.pdnc_rockets_launched_smooth = 0
-global.pdnc_min_per_day = 0.1
+global.pdnc_min_per_day = 15.0
 
 function pdnc_setup()
 	--game.surfaces[global.pdnc_surface].ticks_per_day = pdnc_min_to_ticks(10.0)

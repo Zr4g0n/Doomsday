@@ -4,8 +4,8 @@
 require("pdnc") --is this the best way to do this?
 global.doomsday_enabled = true
 global.doomsday = global.doomsday or {} -- used to check if this exists. 
-global.doomsday_start = 7.75 -- in ingame days. Use n.75 to make sure doomsday is at midnight. 
-global.doomsday_pollution = 2000 -- amount to be applied per tick
+global.doomsday_start = 8.75 -- in ingame days. Use n.75 to make sure doomsday is at midnight. 
+global.doomsday_pollution = 20 -- amount to be applied per tick
 global.doomsday_surface = 1
 global.doomsday_enable_players_online_compensator = false
 global.doomsday_current_fuzzy_playercount = 1.5 -- start assuming 1.5 players! :V
@@ -97,7 +97,7 @@ function doomsday_core()
 		returnvalue = doomsday_pollution_zero_hour(current_time)
 		if not global.doomsday_has_happened then
 			global.doomsday_has_happened = true
-			log("Doomsday activated at tick:" .. game.tick)
+			log("Doomsday activated at tick: " .. game.tick)
 		end
 	else
 		global.pdnc_enable_brightness_limit = true
@@ -107,9 +107,9 @@ function doomsday_core()
 end
 
 function doomsday_pollution_zero_hour(current_time)
-	local radius = 256 --make global
+	local radius = 128 --make global
 	local pollution = global.doomsday_pollution -- total pollution applied per tick
-	local nodes = 7 -- the number of nodes to spread
+	local nodes = 5 -- the number of nodes to spread
 	doomsday_pollute(radius*0.66,pollution,nodes*0.66)
 	doomsday_pollute(radius*1.00,pollution,nodes*1.00)
 	doomsday_pollute(radius*1.50,pollution,nodes*1.50)
