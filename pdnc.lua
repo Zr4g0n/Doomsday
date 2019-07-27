@@ -16,64 +16,72 @@ global.pdnc_current_time = 0
 global.pdnc_current_point = {x = 0, y = 1.0}
 global.pdnc_last_point = {x = -1, y = 0.0}
 global.pdnc_max_brightness = 0.5 -- for clusterio
-global.pdnc_debug = true
+global.pdnc_debug = false
 global.pdnc_enable_brightness_limit = false
 global.pdnc_enable_rocket_darkness = false
 global.pdnc_rockets_launched = 0
 global.pdnc_rockets_launched_step_size = 0.025
 global.pdnc_rockets_launched_smooth = 0
-global.pdnc_min_per_day = 0.5
+global.pdnc_min_per_day = 15.0
 
 function pdnc_setup()
 	--game.surfaces[global.pdnc_surface].ticks_per_day = pdnc_min_to_ticks(10.0)
-	pdnc_on_load()
 	doomsday_setup()
 end
 
-function pdnc_on_load()
-	commands.add_command("pdnc", "gives PDNC's status", pdnc_print_status)
-	commands.add_command("pdnc_toggle", "toggles pdnc", pdnc_toggle)
-	commands.add_command("pdnc_toggle_debug", "toggles pdnc debug mode", pdnc_toggle_debug)
-	commands.add_command("pdnc_disable_and_reset", "Disabled pdnc and resets the dnc to the vanilla default", pdnc_disable_and_reset)
+-- Returns true if the player is an admin
+function check_admin(ctx)
+	local player = game.players[ctx.player_index]
+	if not player.admin then
+		player.print("Only admins can use /"..ctx.name)
+		return false
+	end
+	return true
 end
 
-function pdnc_toggle_debug()
+function pdnc_toggle_debug(ctx)
+	if not check_admin(ctx) then return end
 	global.pdnc_debug = not global.pdnc_debug
-	pdnc_print_status()
+	pdnc_print_status(ctx)
 end
 
-function pdnc_toggle()
+function pdnc_toggle(ctx)
+	if not check_admin(ctx) then return end
 	global.pdnc_enabled = not global.pdnc_enabled
-	pdnc_print_status()
+	pdnc_print_status(ctx)
 end
 
-function pdnc_print_status()
+function pdnc_print_status(ctx)
+	local player = game.players[ctx.player_index]
 	if(global.pdnc_enabled)then
-		game.print("PDNC is enabled")
+		player.print("PDNC is enabled")
 	else
-		game.print("PDNC is disabled")
+		player.print("PDNC is disabled")
 	end
 	
 	if(global.pdnc_debug)then
-		game.print("PDNC debug is enabled")
+		player.print("PDNC debug is enabled")
 		pdnc_extended_status()
 	else
-		game.print("PDNC debug is disabled")
+		player.print("PDNC debug is disabled")
 	end
 end
 
 function pdnc_extended_status()
-	game.print("global.pdnc_stepsize: " .. global.pdnc_stepsize)
-	game.print("global.pdnc_surface: " .. global.pdnc_surface)
-	game.print("global.pdnc_current_time: " .. global.pdnc_current_time)
-	game.print("global.pdnc_max_brightness: " .. global.pdnc_max_brightness)
-	game.print("global.pdnc_enable_brightness_limit: " .. pdnc_bool_to_string(global.pdnc_enable_brightness_limit))
-	game.print("global.pdnc_enable_rocket_darkness: " .. pdnc_bool_to_string(global.pdnc_enable_rocket_darkness))
-	game.print("global.pdnc_rockets_launched: " .. global.pdnc_rockets_launched)
-	game.print("global.pdnc_rockets_launched_step_size: " .. global.pdnc_rockets_launched_step_size)
-	game.print("global.pdnc_rockets_launched_smooth: " .. global.pdnc_rockets_launched_smooth)
-	game.print("ticks per day: " .. game.surfaces[global.pdnc_surface].ticks_per_day)
-	game.print("current tick: " .. game.tick)
+	stats = {
+		"global.pdnc_stepsize: " .. global.pdnc_stepsize,
+		"global.pdnc_surface: " .. global.pdnc_surface,
+		"global.pdnc_current_time: " .. global.pdnc_current_time,
+		"global.pdnc_max_brightness: " .. global.pdnc_max_brightness,
+		"global.pdnc_enable_brightness_limit: " .. pdnc_bool_to_string(global.pdnc_enable_brightness_limit),
+		"global.pdnc_enable_rocket_darkness: " .. pdnc_bool_to_string(global.pdnc_enable_rocket_darkness),
+		"global.pdnc_rockets_launched: " .. global.pdnc_rockets_launched,
+		"global.pdnc_rockets_launched_step_size: " .. global.pdnc_rockets_launched_step_size,
+		"global.pdnc_rockets_launched_smooth: " .. global.pdnc_rockets_launched_smooth,
+		"ticks per day: " .. game.surfaces[global.pdnc_surface].ticks_per_day,
+		"current tick: " .. game.tick,
+	}
+	return stats
 end
 
 function pdnc_bool_to_string(b)
@@ -86,6 +94,7 @@ end
 
 function pdnc_core()
 	if(global.pdnc_enabled)then
+		doomsday_core()
 		local current_surface = game.surfaces[global.pdnc_surface]
 		pdnc_freeze_check(current_surface)
 		current_surface.ticks_per_day = pdnc_min_to_ticks(global.pdnc_min_per_day) -- move this somewhere else; doesn't need to run every nth tick!
@@ -135,7 +144,8 @@ function pdnc_cleanup_last_tick(current_surface)
 	current_surface.morning = 999999999998
 end
 
-function pdnc_disable_and_reset()
+function pdnc_disable_and_reset(ctx)
+	if not check_admin(ctx) then return end
 	local current_surface = game.surfaces[global.pdnc_surface]
 	pdnc_cleanup_last_tick(current_surface)
 	-- DO NOT CHANGE THIS ORDER! 
@@ -250,8 +260,50 @@ function pdnc_debug_message(s)
 end
 
 
---script.on_load(pdnc_on_load())
--- on init and on load, run: pdnc_on_load() doomsday_on_load()
+local PDNC_init = {}
 
+local script_events = {
+	--place the here what you would normaly use Event.register for
+	-- Event.register(defines.events.on_player_created, testfunction)
+	-- is the same as 
+	-- [defines.events.on_player_created] = testfunction,
+	-- where testfunction is | local functuin testfunction() { }
+	--[Event] = function, 
+	--put stuff here
 
+}
 
+PDNC_init.on_nth_ticks = {
+	--place the here what you would normaly use 
+	--[tick] = function,
+	--put stuff here
+	[global.pdnc_stepsize] = pdnc_core,
+}
+
+PDNC_init.add_commands = function()
+	commands.add_command("pdnc", "gives PDNC's status", pdnc_print_status)
+	commands.add_command("pdnc_toggle", "toggles pdnc", pdnc_toggle)
+	commands.add_command("pdnc_toggle_debug", "toggles pdnc debug mode", pdnc_toggle_debug)
+	commands.add_command("pdnc_disable_and_reset", "Disabled pdnc and resets the dnc to the vanilla default", pdnc_disable_and_reset)
+end
+
+PDNC_init.on_init = function() -- this runs when Event.core_events.init
+	log("PDNC init")
+	--put stuff here
+	global.PDNC_data = global.PDNC_data or script_data  -- NO TOUCHY
+
+end
+
+PDNC_init.on_load = function() -- this runs when Event.core_events.load
+	log("PDNC load")
+
+	--put stuff here
+
+	script_data = global.PDNC_data or script_data  -- NO TOUCHY
+end
+
+PDNC_init.get_events = function()
+	return script_events
+end
+
+return PDNC_init
