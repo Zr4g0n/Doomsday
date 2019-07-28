@@ -95,6 +95,7 @@ function doomsday_core()
 		-- days become darker over time towards n^6.125
 	elseif (current_time < global.doomsday_start + 1) then
 		returnvalue = doomsday_pollution_zero_hour(current_time)
+		doomsday_biter_attack_circle
 		if not global.doomsday_has_happened then
 			global.doomsday_has_happened = true
 			log("Doomsday activated at tick: " .. game.tick)
@@ -190,6 +191,44 @@ function doomsday_players_online_compensator()
 	game.forces.player.character_running_speed_modifier = modifier
 	global.doomsday_current_fuzzy_playercount = current
 end
+
+function doomsday_biter_attack_circle(position, radius, nodes, groupsize)
+    local step = ((math.pi * 2) / nodes)
+    for i=0, nodes do
+        local spawn_position = {x = math.sin(step*i)*radius, y = math.cos(step*i)*radius}
+        local groups = game.surfaces[1].create_unit_group({position = spawn_position})
+        for j=0, groupsize do
+            groups.add_member(game.surfaces[1].create_entity{
+				name = "big-biter", 
+				position = game.surfaces[1].find_non_colliding_position("big-biter", spawn_position, 5, 0.3, false)})
+        end
+        groups.set_command{
+			type = defines.command.attack_area,
+			destination = position,
+			distraction = defines.distraction.none,
+			radius = 10 }
+    end
+end
+
+function doomsday_biter_attack_line(line_start_point, line_end_point, nodes, groupsize)
+    for i=0, nodes do
+        local spawn_position = {x = ((line_start_point.x - line_end_point.x)/nodes)*i, y = ((line_start_point.y - line_end_point.y)/nodes)*i}
+        local groups = game.surfaces[1].create_unit_group({position = spawn_position})
+        for j=0, groupsize do
+            groups.add_member(game.surfaces[1].create_entity{
+				name = "big-biter", 
+				position = game.surfaces[1].find_non_colliding_position("big-biter", spawn_position, 5, 0.3, false)})
+        end
+        groups.set_command{
+			type = defines.command.attack_area,
+			destination = position,
+			distraction = defines.distraction.none,
+			radius = 10 }
+    end
+end
+
+pdnc_spawn_biter()
+
 
 --[[
 function reduce_brightness(n)
