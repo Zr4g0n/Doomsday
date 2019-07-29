@@ -61,15 +61,6 @@ function doomsday_setup()
 	end
 end
 
-function doomsday_early_death()
-	local radius = 512
-	local pollution = 2500
-	doomsday_pollute(radius*0.66,pollution,12)
-	doomsday_pollute(radius*1.00,pollution,24)
-	doomsday_pollute(radius*1.50,pollution,36)
-	global.doomsday_early_death_has_happened = true
-end
-
 function doomsday_activate_different_spawn()
 	game.forces["player"].set_spawn_position(global.doomsday_different_spawn, game.surfaces[global.doomsday_surface])
 end
@@ -85,36 +76,51 @@ function doomsday_core()
 	if global.doomsday_use_early_death
 	and (current_time > 1) 
 	and not global.doomsday_early_death_has_happened then
-		doomsday_early_death()
+		local radius = 128
+		local pollution = 2500
+		local nodes = 5
+		doomsday_pollute_ring(radius, pollution, nodes)
 	end
 	
 	local x = current_time * 6.2831853 --2pi
 	local returnvalue = 0
-	if (current_time < global.doomsday_start) then
-		returnvalue = math.pow(pdnc_c_boxy(x), (1 + current_time / 4))
-		-- days become darker over time towards n^6.125
-	elseif (current_time < global.doomsday_start + 1) then
-		returnvalue = doomsday_pollution_zero_hour(current_time)
-		doomsday_biter_attack_circle
+	if (current_time < global.doomsday_start + 1) then
+		doomsday_pollution_zero_hour()
+		local position = {x = 0, y = 0}
+		local radius = 256
+		local nodes = 8
+		local groupsize = 40
+		if global.doomsday_use_different_spawn then
+			position = global.doomsday_different_spawn
+		end
+		doomsday_biter_attack_circle(position, radius, nodes, groupsize)
 		if not global.doomsday_has_happened then
 			global.doomsday_has_happened = true
 			log("Doomsday activated at tick: " .. game.tick)
 		end
-	else
-		global.pdnc_enable_brightness_limit = true
-		returnvalue = math.pow(pdnc_c_boxy(x), 6.125)--*0.5
 	end
-	return pdnc_scaler(returnvalue)
+end
+
+function doomsday_dnc(x)
+	local current_time = game.tick / game.surfaces[global.doomsday_surface].ticks_per_day
+	x = x * 6.28318530717958647692 --tau
+	local returnvalue = 0
+	if (current_time < global.doomsday_start) then
+		return pdnc_scaler(math.pow(pdnc_c_boxy(x), (1 + current_time / 4)))
+	elseif (current_time < global.doomsday_start + 1) then
+		return pdnc_scaler(math.pow(((global.doomsday_start + 1) - current_time), 7))
+	else
+		return pdnc_scaler(math.pow(pdnc_c_boxy(x), 6.125)*0.5)
+	end
 end
 
 function doomsday_pollution_zero_hour(current_time)
 	local radius = 128 --make global
 	local pollution = global.doomsday_pollution -- total pollution applied per tick
 	local nodes = 5 -- the number of nodes to spread
-	doomsday_pollute(radius*0.66,pollution,nodes*0.66)
-	doomsday_pollute(radius*1.00,pollution,nodes*1.00)
-	doomsday_pollute(radius*1.50,pollution,nodes*1.50)
-	return math.pow(((global.doomsday_start + 1) - current_time), 7)
+	doomsday_pollute_ring(radius*0.66,pollution,nodes*0.66)
+	doomsday_pollute_ring(radius*1.00,pollution,nodes*1.00)
+	doomsday_pollute_ring(radius*1.50,pollution,nodes*1.50)
 end
 
 
@@ -123,7 +129,7 @@ function doomsday_normal_curve(x)
 	-- magic numbers to make it scale to (-1, 1)
 end
 
-function doomsday_pollute(radius,pollution,nodes) -- spawn a ring of pollution based on radius, amount of pollution and number of points in the ring. 
+function doomsday_pollute_ring(radius,pollution,nodes) -- spawn a ring of pollution based on radius, amount of pollution and number of points in the ring. 
 	local p = global.pdnc_stepsize * pollution -- needed to make it 'step size independant'
 	p = p / nodes
 	local position = {x = 0.0, y = 0.0}
@@ -195,12 +201,15 @@ end
 function doomsday_biter_attack_circle(position, radius, nodes, groupsize)
     local step = ((math.pi * 2) / nodes)
     for i=0, nodes do
-        local spawn_position = {x = math.sin(step*i)*radius, y = math.cos(step*i)*radius}
-        local groups = game.surfaces[1].create_unit_group({position = spawn_position})
+    	local spawn_position = {x = 0, y = 0}
+		spawn_position.x = math.sin(step*i)*radius + position.x
+		spawn_position.y = math.cos(step*i)*radius + position.y
+		local surface = game.surfaces[global.doomsday_surface]
+        local groups = surface.create_unit_group({position = spawn_position})
         for j=0, groupsize do
-            groups.add_member(game.surfaces[1].create_entity{
-				name = "big-biter", 
-				position = game.surfaces[1].find_non_colliding_position("big-biter", spawn_position, 5, 0.3, false)})
+			groups.add_member(surface.create_entity{
+			name = "big-biter", 
+			position = surface.find_non_colliding_position("big-biter", spawn_position, 5, 0.3, false)})
         end
         groups.set_command{
 			type = defines.command.attack_area,
@@ -226,9 +235,6 @@ function doomsday_biter_attack_line(line_start_point, line_end_point, nodes, gro
 			radius = 10 }
     end
 end
-
-pdnc_spawn_biter()
-
 
 --[[
 function reduce_brightness(n)
