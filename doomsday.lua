@@ -4,7 +4,7 @@
 require("pdnc") --is this the best way to do this?
 global.doomsday_enabled = true
 global.doomsday = global.doomsday or {} -- used to check if this exists. 
-global.doomsday_start = 8.75 -- in ingame days. Use n.75 to make sure doomsday is at midnight. 
+global.doomsday_start = 0.75 -- in ingame days. Use n.75 to make sure doomsday is at midnight. 
 global.doomsday_pollution = 20 -- amount to be applied per tick
 global.doomsday_surface = 1
 global.doomsday_enable_players_online_compensator = false
@@ -72,29 +72,29 @@ function doomsday_core()
 	if(global.doomsday_enable_players_online_compensator)then
 		doomsday_players_online_compensator()
 	end
-	
 	if global.doomsday_use_early_death
-	and (current_time > 1) 
-	and not global.doomsday_early_death_has_happened then
+		and (current_time > 1) 
+		and not global.doomsday_early_death_has_happened then
 		local radius = 128
 		local pollution = 2500
 		local nodes = 5
 		doomsday_pollute_ring(radius, pollution, nodes)
 	end
-	
 	local x = current_time * 6.2831853 --2pi
 	local returnvalue = 0
-	if (current_time < global.doomsday_start + 1) then
-		doomsday_pollution_zero_hour()
-		local position = {x = 0, y = 0}
-		local radius = 256
-		local nodes = 8
-		local groupsize = 40
-		if global.doomsday_use_different_spawn then
-			position = global.doomsday_different_spawn
-		end
-		doomsday_biter_attack_circle(position, radius, nodes, groupsize)
+	if (current_time >= global.doomsday_start)
+		and (current_time < global.doomsday_start + 1) then
 		if not global.doomsday_has_happened then
+			local position = {x = 0, y = 0}
+			local radius = 256
+			local nodes = 8
+			local groupsize = 40
+			local biter_to_spawn = "big-biter"
+			if global.doomsday_use_different_spawn then
+				position = global.doomsday_different_spawn
+			end
+			doomsday_biter_attack_circle(position, radius, nodes, groupsize, biter_to_spawn)
+			--doomsday_pollution_zero_hour()
 			global.doomsday_has_happened = true
 			log("Doomsday activated at tick: " .. game.tick)
 		end
@@ -198,7 +198,7 @@ function doomsday_players_online_compensator()
 	global.doomsday_current_fuzzy_playercount = current
 end
 
-function doomsday_biter_attack_circle(position, radius, nodes, groupsize)
+function doomsday_biter_attack_circle(position, radius, nodes, groupsize, biter_to_spawn)
     local step = ((math.pi * 2) / nodes)
     for i=0, nodes do
     	local spawn_position = {x = 0, y = 0}
@@ -207,9 +207,12 @@ function doomsday_biter_attack_circle(position, radius, nodes, groupsize)
 		local surface = game.surfaces[global.doomsday_surface]
         local groups = surface.create_unit_group({position = spawn_position})
         for j=0, groupsize do
-			groups.add_member(surface.create_entity{
-			name = "big-biter", 
-			position = surface.find_non_colliding_position("big-biter", spawn_position, 5, 0.3, false)})
+        	local non_colliding_position = surface.find_non_colliding_position(biter_to_spawn, spawn_position, 15, 0.8, false)
+        	if non_colliding_position ~= nil then
+				groups.add_member(surface.create_entity{
+				name = biter_to_spawn, 
+				position = non_colliding_position})
+			end
         end
         groups.set_command{
 			type = defines.command.attack_area,

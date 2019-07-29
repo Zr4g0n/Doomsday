@@ -22,7 +22,7 @@ global.pdnc_enable_rocket_darkness = false
 global.pdnc_rockets_launched = 0
 global.pdnc_rockets_launched_step_size = 0.025
 global.pdnc_rockets_launched_smooth = 0
-global.pdnc_min_per_day = 15.0
+global.pdnc_min_per_day = 2.0
 global.pdnc_selector = 1
 
 function pdnc_setup()
@@ -109,7 +109,22 @@ function pdnc_core()
 		local next_point = {x = (global.pdnc_current_time + (global.pdnc_stepsize/current_surface.ticks_per_day)), y = pdnc_multi_program(global.pdnc_current_time + (global.pdnc_stepsize/current_surface.ticks_per_day))}
 		local top_point = pdnc_intersection_top(current_point, next_point)
 		local bot_point = pdnc_intersection_bot(current_point, next_point)
-	
+		
+
+		-- why do I have to keep checking for invalid numbers? ;-;
+		if(top_point == inf)
+			or (top_point == -inf)
+			or (top_point ~= top_point)then
+			pdnc_debug_message("top_point should be a real number, was: " .. top_point)
+			top_point = 0
+		end
+		if(bot_point == inf)
+			or (bot_point == -inf)
+			or (bot_point ~= bot_point)then
+			pdnc_debug_message("bot_point should be a real number, was: " .. bot_point)
+			bot_point = 1
+		end
+
 		-- the order is dusk - evening - morning - dawn. They *must* be in that order and they cannot be equal
 		if(top_point < bot_point) then -- dusk -> evening
 			pdnc_cleanup_last_tick(current_surface)
