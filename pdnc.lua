@@ -16,7 +16,7 @@ global.pdnc_current_time = 0
 global.pdnc_current_point = {x = 0, y = 1.0}
 global.pdnc_last_point = {x = -1, y = 0.0}
 global.pdnc_max_brightness = 0.5 -- for clusterio
-global.pdnc_debug = false
+global.pdnc_debug = true
 global.pdnc_enable_brightness_limit = false
 global.pdnc_enable_rocket_darkness = false
 global.pdnc_rockets_launched = 0
@@ -31,7 +31,7 @@ function pdnc_setup()
 end
 
 -- Returns true if the player is an admin
-function check_admin(ctx)
+function pdnc_is_admin(ctx)
 	local player = game.players[ctx.player_index]
 	if not player.admin then
 		player.print("Only admins can use /"..ctx.name)
@@ -41,15 +41,17 @@ function check_admin(ctx)
 end
 
 function pdnc_toggle_debug(ctx)
-	if not check_admin(ctx) then return end
-	global.pdnc_debug = not global.pdnc_debug
-	pdnc_print_status(ctx)
+	if pdnc_is_admin(ctx) then
+		global.pdnc_debug = not global.pdnc_debug
+		pdnc_print_status(ctx)
+	end
 end
 
 function pdnc_toggle(ctx)
-	if not check_admin(ctx) then return end
-	global.pdnc_enabled = not global.pdnc_enabled
-	pdnc_print_status(ctx)
+	if pdnc_is_admin(ctx) then
+		global.pdnc_enabled = not global.pdnc_enabled
+		pdnc_print_status(ctx)
+	end
 end
 
 function pdnc_print_status(ctx)
@@ -97,53 +99,49 @@ function pdnc_core()
 	if(global.pdnc_enabled)then
 		if global.doomsday ~= nil then
 			if(global.doomsday_enabled) then
-				global.pdnc_selector = 2
-				doomsday_core()
+				--global.pdnc_selector = 2
+				--doomsday_core()
 			end
 		end
 		local current_surface = game.surfaces[global.pdnc_surface]
 		pdnc_freeze_check(current_surface)
 		current_surface.ticks_per_day = pdnc_min_to_ticks(global.pdnc_min_per_day) -- move this somewhere else; doesn't need to run every nth tick!
 		global.pdnc_current_time = game.tick / current_surface.ticks_per_day
-		local current_point = {x = global.pdnc_current_time, y = pdnc_multi_program(global.pdnc_current_time)}
+		local current_point = {x = 0, y = 0}
+		current_point = {x = global.pdnc_current_time, y = pdnc_multi_program(global.pdnc_current_time)}
 		local next_point = {x = (global.pdnc_current_time + (global.pdnc_stepsize/current_surface.ticks_per_day)), y = pdnc_multi_program(global.pdnc_current_time + (global.pdnc_stepsize/current_surface.ticks_per_day))}
 		local top_point = pdnc_intersection_top(current_point, next_point)
 		local bot_point = pdnc_intersection_bot(current_point, next_point)
+		pdnc_debug_message("current_point: x: ".. current_point.x .. " y: " .. current_point.y)
 		
-
-		-- why do I have to keep checking for invalid numbers? ;-;
-		if(top_point == inf)
-			or (top_point == -inf)
-			or (top_point ~= top_point)then
-			pdnc_debug_message("top_point should be a real number, was: " .. top_point)
-			top_point = 0
-		end
-		if(bot_point == inf)
-			or (bot_point == -inf)
-			or (bot_point ~= bot_point)then
-			pdnc_debug_message("bot_point should be a real number, was: " .. bot_point)
-			bot_point = 1
-		end
-
-		-- the order is dusk - evening - morning - dawn. They *must* be in that order and they cannot be equal
-		if(top_point < bot_point) then -- dusk -> evening
-			pdnc_cleanup_last_tick(current_surface)
-			current_surface.evening = bot_point - current_point.x
-			current_surface.dusk = top_point - current_point.x
-		elseif(top_point > bot_point) then -- morning -> dawn
-			pdnc_cleanup_last_tick(current_surface)
-			current_surface.morning = bot_point - current_point.x
-			current_surface.dawn = top_point - current_point.x
-		elseif(top_point == bot_point) then
-			pdnc_debug_message("PDNC: Top and bot point equal")
-			-- no cleanup is done here
-			-- if the points are equal, use last value until not equal
-			-- this should never be reached unless the pdnc_program() is broken.
+		pdnc_cleanup_last_tick(current_surface)
+		-- setting the 4 points to values far outside of expected range so they can be set to arbitrary numbers safely. 
+		-- why do I have to keep checking this...? ;-;
+		if pdnc_check_if_number_is_real(top_point)
+			and pdnc_check_if_number_is_real(bot_point) then
+			if(top_point < bot_point) then -- dusk -> evening
+				current_surface.evening = bot_point - current_point.x
+				current_surface.dusk = top_point - current_point.x
+			elseif(top_point > bot_point) then -- morning -> dawn
+				current_surface.morning = bot_point - current_point.x
+				current_surface.dawn = top_point - current_point.x
+			elseif(top_point == bot_point) then
+				pdnc_debug_message("PDNC: Top and bot point equal")
+				-- no cleanup is done here
+				-- if the points are equal, use last value until not equal
+				-- this should never be reached unless the pdnc_program() is broken.
+			else
+				pdnc_debug_message("Top and bot not different nor equal. probably a NaN error")
+				pdnc_debug_message("bot_point: " .. bot_point)
+				pdnc_debug_message("top_point: " .. top_point)
+				-- this should never be reached.
+			end
 		else
-			pdnc_debug_message("Top and bot not different nor equal. probably a NaN error")
-			pdnc_debug_message("bot_point: " .. bot_point)
-			pdnc_debug_message("top_point: " .. top_point)
-			-- this should never be reached.
+			if not pdnc_check_if_number_is_real(top_point) then
+				pdnc_debug_message("top_point is not a valid number! It's: " .. top_point)
+			else 
+				pdnc_debug_message("bot_point is not a valid number! It's: " .. bot_point)
+			end
 		end
 	end
 end
@@ -170,7 +168,7 @@ function pdnc_cleanup_last_tick(current_surface)
 end
 
 function pdnc_disable_and_reset(ctx)
-	if not check_admin(ctx) then return end
+	if not pdnc_is_admin(ctx) then return end
 	local current_surface = game.surfaces[global.pdnc_surface]
 	pdnc_cleanup_last_tick(current_surface)
 	-- DO NOT CHANGE THIS ORDER! 
@@ -283,6 +281,23 @@ function pdnc_debug_message(s)
 		game.print(s)
 	end
 end
+
+function pdnc_check_if_number_is_real(x)
+	if x ~= x then return false end
+	if x == math.huge then return false end
+	if x == -math.huge then return false end
+	return true
+end
+
+function pdnc_check_if_number_is_in_the_unit_interval(x)
+	if pdnc_check_if_number_is_real(x) then
+		if x < 0.0 then return false end
+		if x > 1.0 then return false end
+		return true
+	else return false
+	end
+end -- true only if 0 <= x <= 1
+
 
 
 local PDNC_init = {}
