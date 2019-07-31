@@ -4,7 +4,7 @@
 require("pdnc") --is this the best way to do this?
 global.doomsday_enabled = true
 global.doomsday = global.doomsday or {} -- used to check if this exists. 
-global.doomsday_start = 0.75 -- in ingame days. Use n.75 to make sure doomsday is at midnight. 
+global.doomsday_start = 2.75 -- in ingame days. Use n.75 to make sure doomsday is at midnight. 
 global.doomsday_pollution = 20 -- amount to be applied per tick
 global.doomsday_surface = 1
 global.doomsday_enable_players_online_compensator = false
@@ -82,22 +82,25 @@ function doomsday_core()
 	end
 	local x = current_time * 6.2831853 --2pi
 	local returnvalue = 0
-	if (current_time >= global.doomsday_start)
-		and (current_time < global.doomsday_start + 1) then
-		if not global.doomsday_has_happened then
-			local position = {x = 0, y = 0}
-			local radius = 256
-			local nodes = 8
-			local groupsize = 40
-			local biter_to_spawn = "big-biter"
-			if global.doomsday_use_different_spawn then
-				position = global.doomsday_different_spawn
-			end
-			doomsday_biter_attack_circle(position, radius, nodes, groupsize, biter_to_spawn)
-			--doomsday_pollution_zero_hour()
-			global.doomsday_has_happened = true
-			log("Doomsday activated at tick: " .. game.tick)
+	if (current_time >= global.doomsday_start) 
+		and not global.doomsday_has_happened then
+		local position = {x = 0, y = 0}
+		local radius = 256
+		local nodes = 8
+		local groupsize = 20
+		local biter_to_spawn = "behemoth-biter"
+		local line_start_point = {x = 100, y = 150}
+		local line_end_point = {x = 200, y = -80}
+		if global.doomsday_use_different_spawn then
+			position = global.doomsday_different_spawn
 		end
+		--doomsday_biter_attack_circle(position, radius, nodes, groupsize, biter_to_spawn)
+		--doomsday_pollution_zero_hour()
+		doomsday_biter_attack_line(line_start_point, line_end_point, nodes, groupsize)
+
+		--doomsday_biter_attack_a_b()
+		global.doomsday_has_happened = true
+		log("Doomsday activated at tick: " .. game.tick)
 	end
 end
 
@@ -105,13 +108,21 @@ function doomsday_dnc(x)
 	local current_time = game.tick / game.surfaces[global.doomsday_surface].ticks_per_day
 	x = x * 6.28318530717958647692 --tau
 	local returnvalue = 0
+	local time_since_doomsday = global.doomsday_start + 1 - current_time
+	if global.time_since_doomsday == 0 then time_since_doomsday = 0.00000000000000001
 	if (current_time < global.doomsday_start) then
-		return pdnc_scaler(math.pow(pdnc_c_boxy(x), (1 + current_time / 4)))
+		returnvalue = pdnc_scaler(math.pow(pdnc_c_boxy(x), (1 + current_time / 4)))
 	elseif (current_time < global.doomsday_start + 1) then
-		return pdnc_scaler(math.pow(((global.doomsday_start + 1) - current_time), 7))
+		returnvalue = pdnc_scaler(math.pow(time_since_doomsday, 7))
 	else
-		return pdnc_scaler(math.pow(pdnc_c_boxy(x), 6.125)*0.5)
+		returnvalue = pdnc_scaler(math.pow(pdnc_c_boxy(x), 6.125)*0.5)
 	end
+	if returnvalue < 0.0 then returnvalue = 0.0 end
+	if returnvalue > 1.0 then returnvalue = 1.0 end
+	if returnvalue ~= returnvalue then returnvalue = 0.5 end
+	if returnvalue == math.huge then returnvalue = 1.0 end
+	if returnvalue == -math.huge then returnvalue = 0.0 end
+	return returnvalue
 end
 
 function doomsday_pollution_zero_hour(current_time)
@@ -223,20 +234,36 @@ function doomsday_biter_attack_circle(position, radius, nodes, groupsize, biter_
 end
 
 function doomsday_biter_attack_line(line_start_point, line_end_point, nodes, groupsize)
-    for i=0, nodes do
-        local spawn_position = {x = ((line_start_point.x - line_end_point.x)/nodes)*i, y = ((line_start_point.y - line_end_point.y)/nodes)*i}
-        local groups = game.surfaces[1].create_unit_group({position = spawn_position})
-        for j=0, groupsize do
-            groups.add_member(game.surfaces[1].create_entity{
+	for i=0, nodes do
+		local spawn_position = {x = ((line_start_point.x - line_end_point.x)/nodes)*i, y = ((line_start_point.y - line_end_point.y)/nodes)*i}
+		local groups = game.surfaces[1].create_unit_group({position = spawn_position})
+		for j=0, groupsize do
+			groups.add_member(game.surfaces[1].create_entity{
 				name = "big-biter", 
 				position = game.surfaces[1].find_non_colliding_position("big-biter", spawn_position, 5, 0.3, false)})
-        end
-        groups.set_command{
+		end
+		groups.set_command{
 			type = defines.command.attack_area,
 			destination = position,
 			distraction = defines.distraction.none,
 			radius = 10 }
-    end
+	end
+end
+
+-- spawns biters at a, to attack b without distractions
+function doomsday_biter_attack_a_b(spawn_biter_position, attack_position, groupsize, biter_to_spawn)
+	local groups = game.surfaces[1].create_unit_group({position = spawn_biter_position})
+	for j=0, groupsize do
+		groups.add_member(game.surfaces[1].create_entity{
+			name = biter_to_spawn, 
+			position = game.surfaces[1].find_non_colliding_position(biter_to_spawn, spawn_position, 5, 0.3, false)})
+	end
+	groups.set_command{
+		type = defines.command.attack_area,
+		destination = attack_position,
+		distraction = defines.distraction.none,
+		radius = 10 }
+	end
 end
 
 --[[
