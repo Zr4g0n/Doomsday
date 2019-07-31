@@ -15,7 +15,27 @@ global.doomsday_use_different_spawn = false
 global.doomsday_different_spawn = {x = -2000, y = -500}
 global.doomsday_has_happened = false 
 
-function doomsday_status()
+-- future work, not yet ready to be implemented!
+--[[
+global.doomsday_settings = {
+	surface = 1, -- the selected surface this module will run on
+	start_time = 2.75, -- this value is in days as per 'ticks per day' 
+	                   -- of the selected surface
+	pollution = 20, -- total amount of pollution to spawn when using 
+	                -- the pollution doomsday scenario
+	scenario = {pollution_ring = false,
+	            attack_ring = false,
+	            attack_line_spawn = false,
+	            attack_line_charge = true
+	}, 
+	-- the different types of doomsday scenarios. Currently not in use, 
+	-- inteded use it to be able to use any combination, as well as use
+	-- them 'in order' one after the other.
+	use_different_spawn = false, -- default is x = 0, y = 0
+	different_spawn = {x = 0, y = 0},
+}
+]]--
+function doomsday_status() -- prints the debug statuses
 	stats = {
 		"Time Left: " .. doomsday_time_left(),
 		"global.doomsday_start: " .. global.doomsday_start,
@@ -65,10 +85,9 @@ function doomsday_activate_different_spawn()
 	game.forces["player"].set_spawn_position(global.doomsday_different_spawn, game.surfaces[global.doomsday_surface])
 end
 
-function doomsday_core()
+function doomsday_core() -- this is the module that runs every Nth tick. Is called from within PDNC
 	local current_time = game.tick / game.surfaces[global.doomsday_surface].ticks_per_day
-	local x = current_time * 6.2831853 --2pi
-	local returnvalue = 0
+	local x = current_time * 6.2831853 --2pi, makes 0 -> 1 one period for trig
 	if(global.doomsday_enable_players_online_compensator)then
 		doomsday_players_online_compensator()
 	end
