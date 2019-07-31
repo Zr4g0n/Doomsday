@@ -33,21 +33,32 @@ function doomsday_status()
 	return stats
 end
 
-function doomsday_console_status()
-		--logs to console, used for debuging
-		log("Time Left: " .. doomsday_time_left())
-		log("global.doomsday_start: " .. global.doomsday_start)
-		log("global.doomsday_pollution: " .. global.doomsday_pollution)
-		log("global.doomsday_surface: " .. global.doomsday_surface)
-		log("global.doomsday_enabled: " .. pdnc_bool_to_string(global.doomsday_enabled))
-		log("global.doomsday_enable_players_online_compensator: " .. pdnc_bool_to_string(global.doomsday_enable_players_online_compensator))
-		log("global.doomsday_current_fuzzy_playercount: " .. global.doomsday_current_fuzzy_playercount)
-		log("global.doomsday_use_early_death: " .. pdnc_bool_to_string(global.doomsday_use_early_death))
-		log("global.doomsday_early_death_has_happened: " .. pdnc_bool_to_string(global.doomsday_early_death_has_happened))
-		log("global.doomsday_use_different_spawn: " .. pdnc_bool_to_string(global.doomsday_use_different_spawn))
-		log("global.doomsday_different_spawn: x = " .. global.doomsday_different_spawn.x .. ", y = " .. global.doomsday_different_spawn.y)
-		log("doomsday_has_happened: " .. pdnc_bool_to_string(global.doomsday_has_happened))
-	return stats
+function doomsday_time_left()
+	if (global.doomsday_start > 0)then
+		local ticks_until_doomsday = game.surfaces[global.doomsday_surface].ticks_per_day * global.doomsday_start
+		local ticks = ticks_until_doomsday - game.tick
+		if (ticks >= 0) then 
+			local seconds = math.floor(ticks/ 60)
+			local minutes = math.floor(seconds / 60)
+			local hours = math.floor(minutes / 60)
+			local days = math.floor(hours / 24)
+			return(string.format("-" .. "%d:%02d:%02d:%02d", hours, minutes % 60, seconds % 60, ticks % 60))
+		else
+			ticks = ticks * -1 
+			local seconds = math.floor(ticks / 60)
+			local minutes = math.floor(seconds / 60)
+			local hours = math.floor(minutes / 60)
+			local days = math.floor(hours / 24)
+			return(string.format("%d:%02d:%02d:%02d", hours, minutes % 60, seconds % 60, ticks % 60) .. " ago...")
+		end
+	else
+		return("Nothing to see here, move along! No doomsday here, nope!")
+	end
+end
+
+function doomsday_time_left_with_ticks()
+	local tick = (((game.surfaces[global.doomsday_surface].ticks_per_day * global.doomsday_start) - game.tick)%60)
+	return doomsday_time_left() .. ":" .. string.format("%02d", tick)
 end
 
 function doomsday_toggle()
@@ -153,34 +164,6 @@ function doomsday_pollute_ring(radius,pollution,nodes) -- spawn a ring of pollut
 		position = {x = math.sin(step*i)*radius, y = math.cos(step*i)*radius}        
 		game.surfaces[global.doomsday_surface].pollute(position, p)
 	end
-end
-
-function doomsday_time_left()
-	if (global.doomsday_start > 0)then
-		local ticks_until_doomsday = game.surfaces[global.doomsday_surface].ticks_per_day * global.doomsday_start
-		local ticks = ticks_until_doomsday - game.tick
-		if (ticks >= 0) then 
-			local seconds = math.floor(ticks/ 60)
-			local minutes = math.floor(seconds / 60)
-			local hours = math.floor(minutes / 60)
-			local days = math.floor(hours / 24)
-			return(string.format("-" .. "%d:%02d:%02d:%02d", hours, minutes % 60, seconds % 60, ticks % 60))
-		else
-			ticks = ticks * -1 
-			local seconds = math.floor(ticks / 60)
-			local minutes = math.floor(seconds / 60)
-			local hours = math.floor(minutes / 60)
-			local days = math.floor(hours / 24)
-			return(string.format("%d:%02d:%02d:%02d", hours, minutes % 60, seconds % 60, ticks % 60) .. " ago...")
-		end
-	else
-		return("Nothing to see here, move along! No doomsday here, nope!")
-	end
-end
-
-function doomsday_time_left_with_ticks()
-	local tick = (((game.surfaces[global.doomsday_surface].ticks_per_day * global.doomsday_start) - game.tick)%60)
-	return doomsday_time_left() .. ":" .. string.format("%02d", tick)
 end
 
 function doomsday_players_online_compensator()
