@@ -127,7 +127,7 @@ local function gui_update_counter(player)
 	frame_counter.clear()
 	frame_counter.add{
 		type = "label",
-		caption = doomsday_time_left()
+		caption = doomsday_time_left(),
 	}
 	frame_counter.location = {player.display_resolution.width/2 - 59, 10}
 	frame_counter.visible = true
