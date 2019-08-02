@@ -159,4 +159,44 @@ function attack_waves_core()
 	end
 end
 
-script.on_nth_tick(240, attack_waves_core)
+local attack_waves_init = {}
+
+local script_events = {
+	--place the here what you would normaly use Event.register for
+	-- Event.register(defines.events.on_player_created, testfunction)
+	-- is the same as 
+	-- [defines.events.on_player_created] = testfunction,
+	-- where testfunction is | local function testfunction() { }
+	--[Event] = function, 
+	--put stuff here
+ 
+}
+
+attack_waves_init.on_nth_ticks = {
+	--place the here what you would normaly use 
+    --[tick] = function,
+    --put stuff here
+    [240], attack_waves_core,
+
+}
+
+attack_waves_init.on_init = function() -- this runs when Event.core_events.init
+    log("attack_waves init")
+	--put stuff here
+
+    global.attack_waves_data = global.attack_waves_data or script_data  -- NO TOUCHY
+
+end
+
+attack_waves_init.on_load = function() -- this runs when Event.core_events.load
+    log("attack_waves load")
+	--put stuff here
+
+    script_data = global.attack_waves_data or script_data  -- NO TOUCHY
+end
+
+attack_waves_init.get_events = function()
+    return script_events
+end
+
+return attack_waves_init
