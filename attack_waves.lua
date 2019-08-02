@@ -176,8 +176,7 @@ attack_waves_init.on_nth_ticks = {
 	--place the here what you would normaly use 
     --[tick] = function,
     --put stuff here
-    [240], attack_waves_core,
-
+    [240] = attack_waves_core,
 }
 
 attack_waves_init.on_init = function() -- this runs when Event.core_events.init
