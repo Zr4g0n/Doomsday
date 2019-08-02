@@ -5,9 +5,10 @@ and for not getting mad when i coppyed it :)
 
 local modules = {
     require("silo-script"),
-    require("pdnc"),
-    require("doomsday"),
-    require("gui"),
+	require("attack_wave"),
+    --require("pdnc"),
+    --require("doomsday"),
+    --require("gui"),
 }
 
 script.on_init(function()
