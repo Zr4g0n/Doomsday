@@ -4,20 +4,20 @@
 	-1000, -1500 -> 1000, 1500
 	spawn 0, -1000
 --]]
-global.time_between_waves = 3600
+global.time_between_waves = 36000
 global.waves = {{ -- 0
 	has_happened = false,
 	trigger_tick = global.time_between_waves, -- 10min
 	biter_to_spawn = "small-biter",
-	nodes = 63,
+	nodes = 40,
 	group_size = 6
 },	{ -- 1
 	has_happened = false,
 	trigger_tick = global.time_between_waves*2, -- 20min
 	biter_to_spawn = "small-biter",
-	nodes = 42,
+	nodes = 38,
 	group_size = 9
-},{ -- 2
+},	{ -- 2
 	has_happened = false,
 	trigger_tick = global.time_between_waves*4, -- 40min
 	biter_to_spawn = "medium-biter",
@@ -107,8 +107,8 @@ function spawn_biters(biter_type, nodes, group_size)
 			start = {x = 0 - map_size.x/2.2, y = map_size.y/2.1},
 			stop  = {x = map_size.x/2.2,     y = map_size.y/2.1}
 		},{
-			start = {x = map_size.x/5,     y = map_size.y/8},
-			stop  = {x = 0 - map_size.x/5, y = map_size.y/8}
+			start = {x = map_size.x/6,     y = map_size.y/2.5},
+			stop  = {x = 0 - map_size.x/6, y = map_size.y/2.5}
 		}
 	}
 	local step_size = {
@@ -145,10 +145,6 @@ function attack_waves_core()
 	local spawn_point = {x = 0, y = 1100}
 	game.forces["player"].set_spawn_position(spawn_point, 1)
 	local tick = game.tick
-	if tick < 480 then
-		local t = global.waves[1].trigger_tick - game.tick
-		game.print("The first wave will spawn in in " .. ((t/60)/60) .. "min!")
-	end
 	for i = 1, #global.waves do
 		if tick >= global.waves[i].trigger_tick and not global.waves[i].has_happened then
 			spawn_biters(global.waves[i].biter_to_spawn, global.waves[i].nodes, global.waves[i].group_size)
