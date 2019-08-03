@@ -1,9 +1,3 @@
---[[
-	Fort Mead
-	2000 x 3000
-	-1000, -1500 -> 1000, 1500
-	spawn 0, -1000
---]]
 global.time_between_waves = 36000
 global.waves = {{ -- 0
 	has_happened = false,
@@ -49,19 +43,19 @@ global.waves = {{ -- 0
 	group_size = 50	
 }, 	{ -- 7
 	has_happened = false,
-	trigger_tick = global.time_between_waves*12.1, -- 121min,
+	trigger_tick = global.time_between_waves*12.05, -- 120.5min,
 	biter_to_spawn = "behemoth-biter",
 	nodes = 6,
 	group_size = 40	
 }, 	{ -- 8
 	has_happened = false,
-	trigger_tick = global.time_between_waves*12.2, -- 122min,
-	biter_to_spawn = "behemoth-biter",
+	trigger_tick = global.time_between_waves*12.1, -- 121min,
+	biter_to_spawn = "behemoth-spitter",
 	nodes = 9,
 	group_size = 30	
 }, 	{ -- 9
 	has_happened = false,
-	trigger_tick = global.time_between_waves*12.3, -- 123min,
+	trigger_tick = global.time_between_waves*12.15, -- 121.5min,
 	biter_to_spawn = "behemoth-biter",
 	nodes = 12,
 	group_size = 20	
@@ -73,7 +67,7 @@ function biter_poly_path(points)
 		list_of_commands[i] = {
 			type = defines.command.attack_area,
 			destination = points[i],
-			distraction = defines.distraction.none,
+			distraction = defines.distraction.by_anything,
 			radius = 3 
 		}
 	end
