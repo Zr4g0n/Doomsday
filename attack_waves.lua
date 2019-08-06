@@ -4,7 +4,13 @@ global.time_between_waves = 36000
 -- medium-biter    medium-spitter
 -- big-biter       big-spitter
 -- behemoth-biter  behemoth-spitter
-
+local settings = {
+	biter_spawn_radius = 50,
+	startup_message_ticks = 1000,
+	map_size = {x = 2000, y = 2000},
+	surface = 1,
+}
+-- global.settings.biter_spawn_radius
 global.waves = {{ -- 1
 	has_happened = false,
 	trigger_tick = global.time_between_waves*2, -- 20min
@@ -68,14 +74,14 @@ function biter_poly_path(points)
 end
 
 function spawn_biters_with_path(points, biter_type, group_size)
-	local groups = game.surfaces[1].create_unit_group({
+	local groups = game.surfaces[settings.surface].create_unit_group({
 		position = points[1]})
 
 	for i = 0, group_size do
-		location = {x = points[1].x, y = points[1].y}
+		location = {x = points[1].x, y = points[1].y} -- first points are always spawn point
 		groups.add_member(game.surfaces[1].create_entity{
 			name = biter_type,
-			position = game.surfaces[1].find_non_colliding_position(biter_type, location, 10, 0.3, false)})
+			position = game.surfaces[1].find_non_colliding_position(biter_type, location, settings.biter_spawn_radius, 0.3, false)})
 	end
 	groups.set_command{
 		type = defines.command.compound,
@@ -85,7 +91,7 @@ function spawn_biters_with_path(points, biter_type, group_size)
 end
 
 function spawn_biters(biter_type, nodes, group_size)
-	local map_size = {x = 2000, y = 4000} -- maybe get from map-gen settings?
+	local map_size = settings.map_size -- maybe get from map-gen settings?
 	local points = {
 		{
 			start = {x = 0 - map_size.x/2.1, y = 0 - map_size.y/3},
@@ -98,30 +104,23 @@ function spawn_biters(biter_type, nodes, group_size)
 			stop  = {x = 0 - map_size.x/40, y = map_size.y/2.3}
 		}
 	}
-	local step_size = {
-		{ 
-			x = (points[1].stop.x - points[1].start.x)/nodes,
-			y = (points[1].stop.y - points[1].start.y)/nodes
-		},{
-			x = (points[2].stop.x - points[2].start.x)/nodes,
-			y = (points[2].stop.y - points[2].start.y)/nodes
-		},{
-			x = (points[3].stop.x - points[3].start.x)/nodes,
-			y = (points[3].stop.y - points[3].start.y)/nodes
+	local step_size = {}
+	for i = 1, #points do
+		step_size[i] =
+		{
+			x = (points[i].stop.x - points[i].start.x)/nodes,
+			y = (points[i].stop.y - points[i].start.y)/nodes
 		}
-	}
-	for i=0, nodes do
-		spawn_biters_with_path(
-			{{
-				x = (points[1].start.x + (step_size[1].x * i)),
-				y = (points[1].start.y + (step_size[1].y * i))
-			},{
-				x = (points[2].start.x + (step_size[2].x * i)),
-				y = (points[2].start.y + (step_size[2].y * i))
-			},{
-				x = (points[3].start.x + (step_size[3].x * i)),
-				y = (points[3].start.y + (step_size[3].y * i))
-			}},
+	end
+	local paths = {}
+	for i=1, nodes do
+		for j = 1, #points do
+			path[j] = {
+				x = (points[j].start.x + (step_size[j].x * i)),
+				y = (points[j].start.y + (step_size[j].y * i))
+			}
+		end
+		spawn_biters_with_path(paths,
 		biter_type, 
 		group_size)
 	end
@@ -129,10 +128,10 @@ end
 
 function attack_waves_core()
 	-- game.force.player.
-	local spawn_point = {x = 0, y = 1818}
-	game.forces["player"].set_spawn_position(spawn_point, 1)
+	local spawn_point = {x = 0, y = 0}
+	game.forces["player"].set_spawn_position(spawn_point, settings.surface)
 	local tick = game.tick
-	if tick < 1000 then
+	if tick < settings.startup_message_ticks then
 		game.print("Attack waves loaded! Running " .. #global.waves .. " waves. Stand by for first wave!")
 	end
 	for i = 1, #global.waves do
