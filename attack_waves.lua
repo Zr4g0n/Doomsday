@@ -148,6 +148,29 @@ function attack_waves_core()
 	end
 end
 
+function attack_waves_single(waves) -- for use with a wave-manager type thing. Future use, not yet ready
+	-- game.force.player.
+	local spawn_point = {x = 0, y = 0}
+	game.forces["player"].set_spawn_position(spawn_point, settings.surface)
+	local tick = game.tick
+	if tick < settings.startup_message_ticks then
+		game.print("Attack waves loaded! Running " .. #waves .. " waves. Stand by for first wave!")
+	end
+	for i = 1, #waves do
+		if tick >= waves[i].trigger_tick and not waves[i].has_happened then
+			spawn_biters(waves[i].biter_to_spawn, waves[i].nodes, waves[i].group_size)
+			waves[i].has_happened = true
+			if (i ~= #waves) then 
+				local time_until_next_wave = waves[i + 1].trigger_tick - waves[i].trigger_tick
+				game.print("Wave number " .. i .. " has spawned! Next wave in " .. ((time_until_next_wave/60)/60) .. "min!")
+			else
+				game.print("The final wave has spawned!")
+			end
+		end
+	end
+	return waves
+end
+
 local attack_waves_init = {}
 
 local script_events = {
