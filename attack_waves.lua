@@ -140,7 +140,6 @@ function spawn_biters(biter_type, nodes, group_size, points)
 end
 
 function attack_waves_core()
-	-- game.force.player.
 	game.forces["player"].set_spawn_position(settings.spawn_point, settings.surface)
 	local tick = game.tick
 	if tick < settings.startup_message_ticks then
@@ -166,17 +165,21 @@ function attack_waves_remote_control(data)
 	lines = data.lines
 	local tick = game.tick
 	if tick < settings.startup_message_ticks then
-		game.print("Attack waves loaded! Running " .. #waves .. " waves. Stand by for first wave!")
+		game.print(settings.startup_message .. #waves)
 	end
 	for i = 1, #waves do
 		if tick >= waves[i].trigger_tick and not waves[i].has_happened then
 			spawn_biters(waves[i].biter_to_spawn, waves[i].nodes, waves[i].group_size)
+			if not waves[i].message == nil then
+				game.print(waves[i].message)
+			end
 			waves[i].has_happened = true
 		end
 	end
 	return waves
 end
 
+--[[
 local attack_waves_init = {}
 
 local script_events = {
@@ -216,4 +219,4 @@ attack_waves_init.get_events = function()
     return script_events
 end
 
-return attack_waves_init
+return attack_waves_init]]
