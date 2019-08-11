@@ -1,16 +1,10 @@
-local tick_time = {
-	second = 60,
-	minute = 3600,
-	hour = 216000,
-}
--- structure is:
--- global.attack_wave_manager_table[set].attack_waves[n].has_happened
--- global.attack_wave_manager_table[set].attack_waves[n].group_size
--- global.attack_wave_manager_table[set].attack_waves[n].message (optional)
--- global.attack_wave_manager_table[set].lines[n].start.x
--- global.attack_wave_manager_table[set].lines[n].stop.y
--- global.attack_wave_manager_table[set].settings.biter_spawn_radius
--- global.attack_wave_manager_table[set].settings.surface
+-- for best performance, run this module *instead of* normal vanilla biters.
+-- From testing, don't spawn more than 400 biters per wave, and no more
+-- than 100 biters per node. Let there be at least 30s between waves to 
+-- let the biters clear out from the spawn-line. Try to keep total number
+-- of biters under about 1000 for performance reasons. Use bigger biters
+-- if it's too easy, or bigger earlier. Remember that spitters have no
+-- flat resistance, so even tier 1 ammo can kill them, eventually. 
 
 -- each attack_wave has it's own 'trigger tick' that's unique to that wave. 
 -- the lines are per set, and the first line is where the biters will spawn,
@@ -26,6 +20,62 @@ local tick_time = {
 -- medium-biter    medium-spitter
 -- big-biter       big-spitter
 -- behemoth-biter  behemoth-spitter
+
+-- structure is:
+-- global.attack_wave_manager_table[set].attack_waves[n].has_happened
+-- global.attack_wave_manager_table[set].attack_waves[n].group_size
+-- global.attack_wave_manager_table[set].attack_waves[n].message (optional)
+-- global.attack_wave_manager_table[set].lines[n].start.x
+-- global.attack_wave_manager_table[set].lines[n].stop.y
+-- global.attack_wave_manager_table[set].settings.biter_spawn_radius
+-- global.attack_wave_manager_table[set].settings.surface
+
+--attack_waves = {{
+	--has_happened = false, -- used to keep track of what waves have and
+	                        -- haven't spawned. You don't have to keep them
+	                        -- ordered
+	--trigger_tick = tick_time.minute*1, -- time, in ticks, at which this
+	                                     -- when this wave will be spawned
+	--biter_to_spawn = "small-biter",
+	--nodes = 10, -- number of groups and how many segments each line is split into. 
+	--group_size = 5 -- number of biters *per node* that will spawn. 
+	                 -- group_size * nodes = total number of biters spawned
+--}}
+
+--settings = {
+	--biter_spawn_radius = 50, -- the radius that will be searched when trying
+	                           -- to spawn in a biter. If failed, no (more)
+	                           -- biters will be spawned at that node. 
+	--startup_message_ticks = 1000, -- The startup message will be printed each time
+	                                -- the core is called until this many ticks. 
+	                                -- Very useful to verify a wave-set is loaded. 
+	--startup_message = "Normal east to west attack wave loaded. Contains this many waves: ",
+	--surface = 1, -- the surface this wave will be spawned on. 1 is the normal surface. 
+--}
+
+-- lines have some assumptions built in that's important to know
+-- The first line is the line where the biters will be spawned. 
+-- Each line will be split into nodes pre wave, and the order of
+-- start and stop matters, since each group will go to it's 'segment'
+-- of the line. The last line is where the biters will end up if alive
+-- Suports any number of lines greater than 1. 1 line *might* work but
+-- it's not supported. They might just spawn and go passive. 
+--lines = {{
+	--start = {x = 1000, y = 100},
+	--stop  = {x = 1000, y = -100}
+--},{
+	--start = {x = -200, y = 100},
+	--stop  = {x = -200, y = -100}
+--},{
+	--start = {x = 20, y = -50},
+	--stop  = {x = 20, y = 50}
+--}},
+
+local tick_time = {
+	second = 60,
+	minute = 3600,
+	hour = 216000,
+}
 
 global.attack_wave_manager_table =
 {{	
