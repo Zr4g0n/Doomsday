@@ -21,6 +21,13 @@
 -- big-biter       big-spitter
 -- behemoth-biter  behemoth-spitter
 
+-- the table contains multiple, different waves. Each elements 
+-- contains the attack waves themselves, the lines to make the
+-- paths from, as well as some settings. Here's how to address
+-- each sub-element. Set is a full set of all settings, N is 
+-- the N'th wave. They can be in any order; the trigger_tick
+-- is the only value that matters for when a wave spawns. 
+
 -- structure is:
 -- global.attack_wave_manager_table[set].attack_waves[n].has_happened
 -- global.attack_wave_manager_table[set].attack_waves[n].group_size
@@ -60,21 +67,24 @@
 -- of the line. The last line is where the biters will end up if alive
 -- Suports any number of lines greater than 1. 1 line *might* work but
 -- it's not supported. They might just spawn and go passive. 
---lines = {{
+
+--lines = {{ -- first line, where biters spawn
 	--start = {x = 1000, y = 100},
 	--stop  = {x = 1000, y = -100}
---},{
+--},{ -- the first target
 	--start = {x = -200, y = 100},
 	--stop  = {x = -200, y = -100}
---},{
+--},{ -- final target. Notice how the Y component is flipped, meaning the
+	  -- the biters will cross paths. This is intentional to make sure the
+	  -- area that's crossed over gets the most heavy biter-load.
 	--start = {x = 20, y = -50},
 	--stop  = {x = 20, y = 50}
 --}},
 
 local tick_time = {
-	second = 60,
-	minute = 3600,
-	hour = 216000,
+	second = 60,  -- in ticks
+	minute = 3600,-- in ticks
+	hour = 216000,-- in ticks
 }
 
 global.attack_wave_manager_table =
