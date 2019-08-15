@@ -81,9 +81,10 @@
 	--stop  = {x = 20, y = 50}
 --}},
 
+require("attack_waves")
 local tick_time = {
 	second = 60,  -- in ticks
-	minute = 3600,-- in ticks
+	minute = 36,-- in ticks
 	hour = 216000,-- in ticks
 }
 
@@ -134,8 +135,8 @@ global.attack_wave_manager_table =
 			group_size = 10
 	}},
 	lines = {{
-			start = {x = -1000, y = 100},
-			stop  = {x = -1000, y = -100}
+			start = {x = -100, y = 100}, -- x = -1000
+			stop  = {x = -100, y = -100} -- x = -1000
 		},{
 			start = {x = 200, y = 100},
 			stop  = {x = 200, y = -100}
@@ -171,8 +172,8 @@ global.attack_wave_manager_table =
 			group_size = 6
 	}},
 		lines = {{
-			start = {x = 1000, y = 100},
-			stop  = {x = 1000, y = -100}
+			start = {x = 1000, y = 100}, -- x = 1000
+			stop  = {x = 1000, y = -100} -- x = 1000
 		},{
 			start = {x = -200, y = 100},
 			stop  = {x = -200, y = -100}
@@ -251,8 +252,8 @@ global.attack_wave_manager_table =
 	}},
 	lines = {
 		{
-			start = {x = -1200, y = 0},
-			stop  = {x = 1200, y = 0}
+			start = {x = -1200, y = 0}, -- x = -1200
+			stop  = {x = 1200, y = 0}   -- x =  1200
 		},{
 			start = {x = -200, y = 0},
 			stop  = {x = 200, y = 0}
@@ -277,5 +278,31 @@ function attack_waves_manager_core()
 	end
 end
 
-script.on_nth_tick(240, attack_waves_manager_core)
--- run attack_waves_manager_core() every few seconds. Not more needed really. 
+-- The following stuff is to make it easier to run multiple different 
+-- copies of the same event. Thanks HORNWITSER
+
+--script.on_nth_tick(240, attack_waves_manager_core)
+local attack_waves_init = {}
+local script_events = {}
+
+attack_waves_init.on_nth_ticks = {
+    [240] = attack_waves_manager_core,
+}
+
+attack_waves_init.on_init = function() -- this runs when Event.core_events.init
+    log("attack_waves_manager init")
+	--put stuff here
+    global.attack_waves_data = global.attack_waves_data or script_data  -- NO TOUCHY
+end
+
+attack_waves_init.on_load = function() -- this runs when Event.core_events.load
+    log("attack_waves load")
+	--put stuff here
+    script_data = global.attack_waves_data or script_data  -- NO TOUCHY
+end
+
+attack_waves_init.get_events = function()
+    return script_events
+end
+
+return attack_waves_init

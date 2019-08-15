@@ -5,7 +5,7 @@
 
 local modules = {
     require("silo-script"),
-	require("attack_waves"),
+	require("attack_waves_manager"),
     --require("pdnc"),
     --require("doomsday"),
     --require("gui"),
