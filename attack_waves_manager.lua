@@ -47,6 +47,9 @@
 	--nodes = 10, -- number of groups and how many segments each line is split into. 
 	--group_size = 5 -- number of biters *per node* that will spawn. 
 	                 -- group_size * nodes = total number of biters spawned
+	--!!!! nodes * group_size should be *less than* 200 for optimal performance!!!
+	--distraction = defines.distraction.none, -- optional, defaults to 'anything'
+	--message = "test", -- is followed by #waves -- optinal
 --}}
 
 --settings = {
@@ -81,6 +84,56 @@
 	--stop  = {x = 20, y = 50}
 --}},
 
+--[[ -- here's the structure laid out. You can have as many sets, waves,
+     -- and lines as desired.  
+global.attack_wave_manager_table =
+{
+	{	-- first set of attack-waves
+		attack_waves =
+		{
+			{ 	-- first wave
+			
+			},{	-- second wave
+				
+			}
+		},
+		lines = 
+		{
+			{   -- first line
+				
+			},{ -- second line
+			
+			}
+		},
+		settings = 
+		{
+
+		}
+	},{	-- second set of attack-waves
+		attack_waves =
+		{
+			{ 	-- first wave
+			
+			},{	-- second wave
+				
+			}
+		},
+		lines = 
+		{
+			{   -- first line
+				
+			},{ -- second line
+			
+			}
+		},
+		settings = 
+		{
+
+		}
+	}
+}
+--]]
+
 require("attack_waves")
 local tick_time = {
 	second = 60,  -- in ticks
@@ -96,56 +149,59 @@ global.attack_wave_manager_table =
 			trigger_tick = tick_time.minute*1,
 			biter_to_spawn = "small-biter",
 			nodes = 10,
-			group_size = 2--5
+			group_size = 10--5
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*8,
 			biter_to_spawn = "small-biter",
 			nodes = 7,
-			group_size = 2--10
+			group_size = 13--10
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*10,
 			biter_to_spawn = "small-biter",
-			nodes = 10,
-			group_size = 2--10
+			nodes = 11,
+			group_size = 9--10
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*11,
 			biter_to_spawn = "small-biter",
-			nodes = 10,
-			group_size = 2--10
+			nodes = 12,
+			group_size = 12--10
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*16,
 			biter_to_spawn = "small-biter",
-			nodes = 10,
-			group_size = 2--10
+			nodes = 5,
+			group_size = 20--10
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*20,
 			biter_to_spawn = "small-biter",
 			nodes = 10,
-			group_size = 2--10
+			group_size = 10--10
 		},{
 			has_happened = false,
-			trigger_tick = tick_time.minute*13,
+			trigger_tick = tick_time.minute*33,
 			biter_to_spawn = "small-biter",
-			nodes = 10,
-			group_size = 2--10
+			nodes = 11,
+			group_size = 9--10
 	}},
 	lines = {{
-			start = {x = -100, y = 100}, -- x = -1000
-			stop  = {x = -100, y = -100} -- x = -1000
+			start = {x =-200, y = 100}, -- x = -1000
+			stop  = {x =-200, y =-100} -- x = -1000
 		},{
-			start = {x = 200, y = 100},
-			stop  = {x = 200, y = -100}
+			start = {x =-100, y = 100},
+			stop  = {x =-100, y =-100}
 		},{
-			start = {x = -20, y = -50},
-			stop  = {x = -20, y = 50}
+			start = {x =   0, y = 100},
+			stop  = {x =   0, y =-100}
+		},{
+			start = {x = 20, y = -20},
+			stop  = {x = 20, y =  20}
 	}},
 	settings = {
-		biter_spawn_radius = 50,
+		biter_spawn_radius = 10,
 		startup_message_ticks = 1000,
 		startup_message = "Normal east to west attack wave loaded. Contains this many waves: ",
 		surface = 1,
@@ -154,32 +210,62 @@ global.attack_wave_manager_table =
 	attack_waves = {
 		{
 			has_happened = false,
-			trigger_tick = tick_time.minute*15,
+			trigger_tick = tick_time.minute*2,
 			biter_to_spawn = "small-biter",
-			nodes = 2,--40,
-			group_size = 2--6
+			nodes = 10,--40,
+			group_size = 10--6
 		},{
 			has_happened = false,
-			trigger_tick = tick_time.minute*20,
+			trigger_tick = tick_time.minute*4,
 			biter_to_spawn = "small-biter",
-			nodes = 2,--40,
-			group_size = 2--6
+			nodes = 10,--40,
+			group_size = 10--6
 		},{
 			has_happened = false,
-			trigger_tick = tick_time.minute*50,
+			trigger_tick = tick_time.minute*6,
 			biter_to_spawn = "small-biter",
-			nodes = 2,--40,
-			group_size = 2--6
+			nodes = 10,--40,
+			group_size = 10--6
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*8,
+			biter_to_spawn = "small-biter",
+			nodes = 10,--40,
+			group_size = 10--6
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*10,
+			biter_to_spawn = "small-biter",
+			nodes = 10,--40,
+			group_size = 10--6
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*12,
+			biter_to_spawn = "small-biter",
+			nodes = 10,--40,
+			group_size = 10--6
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*14,
+			biter_to_spawn = "small-biter",
+			nodes = 10,--40,
+			group_size = 10--6
 	}},
 		lines = {{
-			start = {x = 100, y = 100}, -- x = 1000
-			stop  = {x = 100, y = -100} -- x = 1000
+			start = {x = 200, y = 100}, -- x = 1000
+			stop  = {x = 200, y =-100} -- x = 1000
 		},{
-			start = {x = -200, y = 100},
-			stop  = {x = -200, y = -100}
+			start = {x = 100, y = 100},
+			stop  = {x = 100, y =-100}
 		},{
-			start = {x = 20, y = -50},
-			stop  = {x = 20, y = 50}
+			start = {x =   0, y = 100},
+			stop  = {x =   0, y =-100}
+		},{
+			start = {x =-100, y = 100},
+			stop  = {x =-100, y =-100}
+		},{
+			start = {x =  20, y = -50},
+			stop  = {x =  20, y =  50}
 	}},
 	settings = {
 		biter_spawn_radius = 50,
@@ -362,9 +448,11 @@ function attack_waves_manager_core()
 	--game.forces["player"].set_spawn_position(spawn_point, .surface)
 	for i = 1, #global.attack_wave_manager_table do
 		global.attack_wave_manager_table[i].attack_waves = attack_waves_remote_control(global.attack_wave_manager_table[i])
-		game.print("Attack_wave set nr " .. i)
 		-- this is the best way I know to get the 'has happened' boolean back
 		-- to the global table while supporting arbitrary number of waves. 
+	end
+	if game.tick < 300 then
+		game.forces["player"].chart(1, {{x = -500, y = -500}, {x = 500, y = 500}})
 	end
 end
 
@@ -377,6 +465,7 @@ local script_events = {}
 
 attack_waves_init.on_nth_ticks = {
     [240] = attack_waves_manager_core,
+    [15] = function() game.forces["player"].chart_all() end,
 }
 
 attack_waves_init.on_init = function() -- this runs when Event.core_events.init

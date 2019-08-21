@@ -1,5 +1,9 @@
+global.attack_waves_debug = false
 function biter_poly_path(points, waves)
 	local distraction = waves.distraction or defines.distraction.by_anything
+	if global.attack_waves_debug and not waves.distraction then
+		game.print("No distraction set, using default by_anything. trigger_tick: " .. waves.trigger_tick)
+	end
 	-- defaults setting
 	local list_of_commands = {}
 	for i=1, #points do
@@ -14,22 +18,32 @@ function biter_poly_path(points, waves)
 end
 
 function spawn_biters_with_path(points, waves, settings)
+	game.print(settings.surface)
 	local groups = game.surfaces[settings.surface].create_unit_group({
 		position = points[1]})
 	-- first x,y in points[] is used as the spawn point.
 	-- maybe skip loop if no possition is found instead of re-trying group_size number of times?
-	for i = 0, group_size do
+	for i = 0, waves.group_size do
 		location = {x = points[1].x, y = points[1].y} -- first points are always spawn point
-		local spawn_point = game.surfaces[1].find_non_colliding_position(waves.biter_type, location, settings.biter_spawn_radius, 0.3, false)
-		if not spawn_point == nil then -- incase no possition is found
+		local spawn_point = game.surfaces[settings.surface].find_non_colliding_position(waves.biter_to_spawn, location, settings.biter_spawn_radius, 0.3, false)
+		if spawn_point == nil then 
+			if global.attack_waves_debug then
+				game.print("settings.biter_spawn_radius " .. settings.biter_spawn_radius)
+				game.print("waves.biter_to_spawn " .. waves.biter_to_spawn)
+				game.print("spawn_point.x " .. spawn_point.x)
+				game.print("spawn_point.y " .. spawn_point.y)
+				game.print("[gps="..location.x..","..location.y.."]")
+			end-- incase no possition is found
+		else
 			groups.add_member(game.surfaces[settings.surface].create_entity{
-				name = waves.biter_type,
+				name = waves.biter_to_spawn,
 				position = spawn_point,
 			})
-			game.print("Spawned " .. waves.biter_type .. " at x: " .. spawn_point.x .. ", y: " .. spawn_point.y .. " successfully!"
+			if global.attack_waves_debug then
+				game.print("Spawned " .. waves.biter_to_spawn .. " at x: " .. spawn_point.x .. ", y: " .. spawn_point.y .. " successfully!")
+			end
 		end
 	end
-	--game.print("Spawned " .. group_size .. " " .. biter_type .. "s at x: " .. points[1].x .. ", y: " .. points[1].y)
 	groups.set_command{
 		type = defines.command.compound,
 		structure_type = defines.compound_command.return_last,
@@ -37,7 +51,6 @@ function spawn_biters_with_path(points, waves, settings)
 	}
 end
 
---function spawn_biters(biter_type, nodes, group_size, points)
 function spawn_biters(settings, waves, lines)
 
 	-- local map_size = settings.map_size -- maybe get from map-gen settings?
@@ -50,7 +63,7 @@ function spawn_biters(settings, waves, lines)
 		}
 	end
 	local paths = {} 
-	for i=1, waves.nodes do
+	for i=0, waves.nodes do
 		for j = 1, #lines do
 			paths[j] = {
 				x = (lines[j].start.x + (step_size[j].x * i)),
@@ -59,17 +72,16 @@ function spawn_biters(settings, waves, lines)
 		end -- final list of paths used to spawn biters and give them attack coords.
 		spawn_biters_with_path(paths,
 		waves, 
-		waves,
-		settings,)
+		settings)
 	end
 end
 
 function attack_waves_remote_control(data)
 	local tick = game.tick
-	if (tick < settings.startup_message_ticks) and not (settings.startup_message == nil) then
-		game.print(settings.startup_message .. #waves)
+	if (tick < data.settings.startup_message_ticks) and not (data.settings.startup_message == nil) then
+		game.print(data.settings.startup_message .. #data.attack_waves)
 	end
-	for i = 1, #waves do
+	for i = 1, #data.attack_waves do
 		if tick >= data.attack_waves[i].trigger_tick and not data.attack_waves[i].has_happened then
 			spawn_biters(data.settings, data.attack_waves[i], data.lines)
 			if not data.attack_waves[i].message == nil then
