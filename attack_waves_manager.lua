@@ -84,7 +84,7 @@
 require("attack_waves")
 local tick_time = {
 	second = 60,  -- in ticks
-	minute = 36,-- in ticks
+	minute = 3600,-- in ticks
 	hour = 216000,-- in ticks
 }
 
@@ -96,43 +96,43 @@ global.attack_wave_manager_table =
 			trigger_tick = tick_time.minute*1,
 			biter_to_spawn = "small-biter",
 			nodes = 10,
-			group_size = 5
+			group_size = 2--5
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*8,
 			biter_to_spawn = "small-biter",
 			nodes = 7,
-			group_size = 10
+			group_size = 2--10
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*10,
 			biter_to_spawn = "small-biter",
 			nodes = 10,
-			group_size = 10
+			group_size = 2--10
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*11,
 			biter_to_spawn = "small-biter",
 			nodes = 10,
-			group_size = 10
+			group_size = 2--10
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*16,
 			biter_to_spawn = "small-biter",
 			nodes = 10,
-			group_size = 10
+			group_size = 2--10
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*20,
 			biter_to_spawn = "small-biter",
 			nodes = 10,
-			group_size = 10
+			group_size = 2--10
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*13,
 			biter_to_spawn = "small-biter",
 			nodes = 10,
-			group_size = 10
+			group_size = 2--10
 	}},
 	lines = {{
 			start = {x = -100, y = 100}, -- x = -1000
@@ -156,24 +156,24 @@ global.attack_wave_manager_table =
 			has_happened = false,
 			trigger_tick = tick_time.minute*15,
 			biter_to_spawn = "small-biter",
-			nodes = 40,
-			group_size = 6
+			nodes = 2,--40,
+			group_size = 2--6
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*20,
 			biter_to_spawn = "small-biter",
-			nodes = 40,
-			group_size = 6
+			nodes = 2,--40,
+			group_size = 2--6
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*50,
 			biter_to_spawn = "small-biter",
-			nodes = 40,
-			group_size = 6
+			nodes = 2,--40,
+			group_size = 2--6
 	}},
 		lines = {{
-			start = {x = 1000, y = 100}, -- x = 1000
-			stop  = {x = 1000, y = -100} -- x = 1000
+			start = {x = 100, y = 100}, -- x = 1000
+			stop  = {x = 100, y = -100} -- x = 1000
 		},{
 			start = {x = -200, y = 100},
 			stop  = {x = -200, y = -100}
@@ -187,7 +187,10 @@ global.attack_wave_manager_table =
 		startup_message = "Normal west to east attack wave loaded. Contains this many waves: ",
 		surface = 1,
 	}
-},{	
+},{
+	-- brutal set of waves designed to push players to the brink of death every time.
+	-- these use the lack of flat resistance on the behemoth spitter to freak the 
+	-- player out hard by spawning them very eary
 	attack_waves = {
 		{ -- First wave to drain the first ammo from all players. 10 players assumed. 
 			has_happened = false,
@@ -195,27 +198,45 @@ global.attack_wave_manager_table =
 			biter_to_spawn = "small-biter",
 			nodes = 2,
 			group_size = 65,
+			distraction = defines.distraction.none,
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*5,
 			biter_to_spawn = "medium-biter",
 			nodes = 2,
 			group_size = 20,
+			distraction = defines.distraction.none,
 			message = "Have you seen my friends?~ Hehe, ho - haha! Magic!",
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*15,
+			biter_to_spawn = "small-biter",
+			nodes = 13,
+			group_size = 20,
+			distraction = defines.distraction.none,
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*15.5,
 			biter_to_spawn = "behemoth-spitter",
-			nodes = 2,
-			group_size = 3,
-			message = "Aaaaa-haha, AAAAAAAaaaahahahahahah!!!!!!!!",
+			nodes = 13,
+			group_size = 1,
+			distraction = defines.distraction.none,
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*16,
+			biter_to_spawn = "small-biter",
+			nodes = 13,
+			group_size = 20,
+			distraction = defines.distraction.none,
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*25,
 			biter_to_spawn = "behemoth-spitter",
-			nodes = 2,
+			nodes = 3,
 			group_size = 15,
+			distraction = defines.distraction.none,
 			message = "You're still alive? My appologies, please, allow me to correct my misstake!",
+
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*35,
@@ -223,48 +244,116 @@ global.attack_wave_manager_table =
 			nodes = 2,
 			group_size = 60,
 			message = "Death will be here soon enough. Just give up now and I won't have to waste my time any longer.",
+			distraction = defines.distraction.none,
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*44.5,
 			biter_to_spawn = "behemoth-biter",
 			nodes = 2,
 			group_size = 100,
+			distraction = defines.distraction.none,
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*45,
 			biter_to_spawn = "behemoth-spitter",
 			nodes = 2,
 			group_size = 60,
+			distraction = defines.distraction.none,
 			message = "How are you even still alive? WHY WON'T YOU DIE ALREADY!?",
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*54.5,
 			biter_to_spawn = "behemoth-biter",
-			nodes = 4,
-			group_size = 100,
+			nodes = 10,
+			group_size = 20,
+			distraction = defines.distraction.none,
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*55,
+			biter_to_spawn = "behemoth-biter",
+			nodes = 10,
+			group_size = 20,
+			distraction = defines.distraction.none,
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*55.5,
 			biter_to_spawn = "behemoth-spitter",
-			nodes = 4,
-			group_size = 80,
+			nodes = 10,
+			group_size = 20,
+			distraction = defines.distraction.none,
 			message = "DIE!!! DIE!!! DIE!!! DIE!!! DIE!!! DIE!!! DIE!!!",
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*56,
+			biter_to_spawn = "behemoth-biter",
+			nodes = 10,
+			group_size = 20,
+			distraction = defines.distraction.none,
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*56.5,
+			biter_to_spawn = "behemoth-spitter",
+			nodes = 10,
+			group_size = 20,
+			distraction = defines.distraction.none,
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*57,
+			biter_to_spawn = "behemoth-biter",
+			nodes = 10,
+			group_size = 20,
+			distraction = defines.distraction.none,
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*57.5,
+			biter_to_spawn = "behemoth-spitter",
+			nodes = 10,
+			group_size = 20,
+			distraction = defines.distraction.none,
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*58,
+			biter_to_spawn = "behemoth-biter",
+			nodes = 10,
+			group_size = 20,
+			distraction = defines.distraction.none,
 	}},
 	lines = {
+		-- a simple tight march. Designed to avoid biters using 
+		-- neighbouring paths. It's supposed to be one wide wave
+		-- of biters, not two globs
 		{
-			start = {x = -1200, y = 0}, -- x = -1200
-			stop  = {x = 1200, y = 0}   -- x =  1200
+			start = {x = -100, y = -300}, 
+			stop  = {x =  100, y = -300}
 		},{
-			start = {x = -200, y = 0},
-			stop  = {x = 200, y = 0}
+			start = {x = -100, y = -250},
+			stop  = {x =  100, y = -250} 
 		},{
-			start = {x = 20, y = 0},
-			stop  = {x = -20, y = 0}
+			start = {x = -100, y = -200},
+			stop  = {x =  100, y = -200} 
+		},{
+			start = {x = -100, y = -150},
+			stop  = {x =  100, y = -150} 
+		},{
+			start = {x = -100, y = -100},
+			stop  = {x =  100, y = -100} 
+		},{
+			start = {x = -100, y =  -50},
+			stop  = {x =  100, y =  -50} 
+		},{
+			start = {x = -100, y =    0},
+			stop  = {x =  100, y =    0} 
+		},{
+			start = {x = -100, y =   50},
+			stop  = {x =  100, y =   50} 
+		},{
+			start = {x =   20, y =    0},
+			stop  = {x =  -20, y =    0}
 	}},
 	settings = {
 		biter_spawn_radius = 100,
 		startup_message_ticks = 1000,
-		startup_message = "Double-sided attack wave loaded. How many waves will fuck you up? The answer is ",
+		startup_message = "Double-sided attack wave loaded. How many waves will fuck you up? The answer is ", --#waves
 		surface = 1,
 	}
 }}
@@ -273,6 +362,7 @@ function attack_waves_manager_core()
 	--game.forces["player"].set_spawn_position(spawn_point, .surface)
 	for i = 1, #global.attack_wave_manager_table do
 		global.attack_wave_manager_table[i].attack_waves = attack_waves_remote_control(global.attack_wave_manager_table[i])
+		game.print("Attack_wave set nr " .. i)
 		-- this is the best way I know to get the 'has happened' boolean back
 		-- to the global table while supporting arbitrary number of waves. 
 	end

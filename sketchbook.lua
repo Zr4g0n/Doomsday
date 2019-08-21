@@ -84,4 +84,3 @@ end
 test_biter()
 
 
-spawn_biters(spawn_biters_with_path(spawn_biters_with_path())
