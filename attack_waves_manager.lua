@@ -133,7 +133,7 @@ global.attack_wave_manager_table =
 	}
 }
 --]]
-
+global.attack_waves_manager_final_spawn = false
 require("attack_waves")
 local tick_time = {
 	second = 60,  -- in ticks
@@ -468,9 +468,10 @@ end
 
 
 function attack_waves_manager_setup()
-	local offset_start_time = tick_time.minute*20
-	local time_between_waves = 2 * tick_time.minute * (math.random()+0.5)
-	local number_of_waves = tick_time.hour / time_between_waves
+	local target_wave_size = 300
+	local offset_start_time = tick_time.minute*6
+	local time_between_waves = 1 * tick_time.minute * (math.random()+0.5)
+	local number_of_waves = (tick_time.hour*1.5) / time_between_waves
 	local new_set = {settings={}, lines={},attack_waves={}}
 	new_set.settings={
 		biter_spawn_radius = 20,
@@ -513,18 +514,18 @@ function attack_waves_manager_setup()
 		new_set.attack_waves[i] = {
 			has_happened = false,
 			trigger_tick = offset_start_time + time_between_waves*i,
-			biter_to_spawn = attack_waves_manager_get_enemy(i/(number_of_waves/4)),
+			biter_to_spawn = attack_waves_manager_get_enemy(i/(number_of_waves/6)),
 			nodes = random_holder,
-			group_size = 200/random_holder,
+			group_size = target_wave_size/random_holder,
 			distraction = defines.distraction.none,
 		}
 	end
 	new_set_mirror = deepcopy(new_set)
 	for i=1, number_of_waves do
 		random_holder = math.random(2,20)
-		new_set_mirror.attack_waves[i].biter_to_spawn = attack_waves_manager_get_enemy(i/(number_of_waves/4))
+		new_set_mirror.attack_waves[i].biter_to_spawn = attack_waves_manager_get_enemy(i/(number_of_waves/6))
 		new_set_mirror.attack_waves[i].nodes = random_holder
-		new_set_mirror.attack_waves[i].group_size = 200/random_holder
+		new_set_mirror.attack_waves[i].group_size = target_wave_size/random_holder
 	end
 	for i=1, #new_set_mirror.lines do
 		new_set_mirror.lines[i].start.y = -1 * new_set_mirror.lines[i].start.y
@@ -534,11 +535,181 @@ function attack_waves_manager_setup()
 
 	--global.attack_wave_manager_table[4] = new_set
 	--global.attack_wave_manager_table[5] = new_set_mirror
-	global.attack_wave_manager_table[#global.attack_wave_manager_table+1] = new_set
-	global.attack_wave_manager_table[#global.attack_wave_manager_table+1] = new_set_mirror
+	global.attack_wave_manager_table[#global.attack_wave_manager_table+1] = new_set --4
+	global.attack_wave_manager_table[#global.attack_wave_manager_table+1] = new_set_mirror --5
+	global.attack_wave_manager_table[#global.attack_wave_manager_table+1] = deepcopy(global.attack_wave_manager_table[3])--6
+	global.attack_wave_manager_table[#global.attack_wave_manager_table+1] = deepcopy(global.attack_wave_manager_table[3])--7
+	global.attack_wave_manager_table[#global.attack_wave_manager_table+1] = deepcopy(global.attack_wave_manager_table[3])--8
+	
+	local new_lines ={ -- from south marching north towards spawn
+		{
+			start = {x = -100, y = 300}, 
+			stop  = {x =  100, y = 300}
+		},{
+			start = {x = -20, y = 120}, 
+			stop  = {x =  20, y = 120}
+		},{
+			start = {x =   20, y =   0},
+			stop  = {x =  -20, y =   0}
+	}}
+	global.attack_wave_manager_table[6].lines=new_lines
+	local new_lines2 ={ -- from south marching north towards spawn
+		{
+			start = {x = 300, y =-100}, 
+			stop  = {x = 300, y = 100}
+		},{
+			start = {x = 120, y =-100}, 
+			stop  = {x = 120, y = 100}
+		},{
+			start = {x =   0, y =  20},
+			stop  = {x =   0, y = -20}
+	}}
+	global.attack_wave_manager_table[7].lines=new_lines
+	local new_lines3 ={ -- from south marching north towards spawn
+		{
+			start = {x = -300, y =-100}, 
+			stop  = {x = -300, y = 100}
+		},{
+			start = {x = -120, y =-100}, 
+			stop  = {x = -120, y = 100}
+		},{
+			start = {x =   0, y =  20},
+			stop  = {x =   0, y = -20}
+	}}
+	global.attack_wave_manager_table[8].lines=new_lines
+	for i = 1, #global.attack_wave_manager_table[6].attack_waves do
+	--for i = 1, 17 do
+		global.attack_wave_manager_table[6].attack_waves[i].message = nil
+		--global.attack_wave_manager_table[7].attack_waves[i].message = nil
+		--global.attack_wave_manager_table[8].attack_waves[i].message = nil
+	end
+	for i = 1, #global.attack_wave_manager_table[7].attack_waves do
+		global.attack_wave_manager_table[7].attack_waves[i].message = nil
+	end
+	for i = 1, #global.attack_wave_manager_table[8].attack_waves do
+		global.attack_wave_manager_table[8].attack_waves[i].message = nil
+	end
+
+	global.attack_wave_manager_table[#global.attack_wave_manager_table+1]={
+	attack_waves = {
+		{
+			has_happened = false,
+			trigger_tick = tick_time.minute*2,
+			biter_to_spawn = attack_waves_manager_get_enemy(1),
+			nodes = 3,
+			group_size = 30
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*2.25,
+			biter_to_spawn = attack_waves_manager_get_enemy(1),
+			nodes = 3,
+			group_size = 30
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*2.5,
+			biter_to_spawn = attack_waves_manager_get_enemy(1),
+			nodes = 3,
+			group_size = 30
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*11,
+			biter_to_spawn = attack_waves_manager_get_enemy(2),
+			nodes = 3,
+			group_size = 50
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*21,
+			biter_to_spawn = attack_waves_manager_get_enemy(5*math.random()),
+			nodes = 3,
+			group_size = 50
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*21.33,
+			biter_to_spawn = attack_waves_manager_get_enemy(5*math.random()),
+			nodes = 3,
+			group_size = 50
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*21.66,
+			biter_to_spawn = attack_waves_manager_get_enemy(5*math.random()),
+			nodes = 3,
+			group_size = 50
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*31.25,
+			biter_to_spawn = attack_waves_manager_get_enemy(4),
+			nodes = 3,
+			group_size = 50
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*41,
+			biter_to_spawn = attack_waves_manager_get_enemy(4),
+			nodes = 3,
+			group_size = 50
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*41.25,
+			biter_to_spawn = attack_waves_manager_get_enemy(4),
+			nodes = 3,
+			group_size = 50
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*41.5,
+			biter_to_spawn = attack_waves_manager_get_enemy(4),
+			nodes = 3,
+			group_size = 50
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*51.0,
+			biter_to_spawn = attack_waves_manager_get_enemy(4),
+			nodes = 3,
+			group_size = 50
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*51.25,
+			biter_to_spawn = attack_waves_manager_get_enemy(4),
+			nodes = 3,
+			group_size = 50
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*51.5,
+			biter_to_spawn = attack_waves_manager_get_enemy(4),
+			nodes = 3,
+			group_size = 50
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*51.75,
+			biter_to_spawn = attack_waves_manager_get_enemy(4),
+			nodes = 3,
+			group_size = 50
+		},{
+			has_happened = false,
+			trigger_tick = tick_time.minute*52.0,
+			biter_to_spawn = attack_waves_manager_get_enemy(4),
+			nodes = 3,
+			group_size = 50
+	}},
+	lines = {{
+			start = {x = 220, y = 220}, -- x = -1000
+			stop  = {x = 180, y = 180} -- x = -1000
+		},{
+			start = {x = 125, y = 125},
+			stop  = {x = 115, y = 115}
+		},{
+			start = {x =   0, y =   0},
+			stop  = {x =   0, y =   0}
+		}},
+	settings = {
+		biter_spawn_radius = 10,
+		startup_message_ticks = 1000,
+		startup_message = "South-east to north-west attack wave loaded. Contains this many waves: ",
+		surface = 1,
+	}}
 end
 
 function attack_waves_manager_core()
+	--todo; seperate lines from waves, allow random selection of lines for each wave
+	--      unless a wave specifies what set of lines to use
 	--game.forces["player"].set_spawn_position(spawn_point, .surface)
 	for i = 1, #global.attack_wave_manager_table do
 		global.attack_wave_manager_table[i].attack_waves = attack_waves_remote_control(global.attack_wave_manager_table[i])
@@ -548,6 +719,27 @@ function attack_waves_manager_core()
 	local value = 1+math.random()*4
 	if game.tick < 300 then
 		game.forces["player"].chart(1, {{x = -500, y = -500}, {x = 500, y = 500}})
+	end
+	local counter = 0
+	for i = 1, #global.attack_wave_manager_table do
+		for j = 1, #global.attack_wave_manager_table[i].attack_waves do
+			if not global.attack_wave_manager_table[i].attack_waves[j].has_happened then counter = counter + 1 end
+		end
+	end
+	if counter == 0 then
+		global.attack_waves_manager_final_spawn = true
+	end
+	if  global.attack_waves_manager_final_spawn
+	and game.forces["enemy"].get_entity_count("small-biter") == 0 
+	and game.forces["enemy"].get_entity_count("medium-biter") == 0
+	and game.forces["enemy"].get_entity_count("big-biter") == 0
+	and game.forces["enemy"].get_entity_count("behemoth-biter") == 0
+	and game.forces["enemy"].get_entity_count("small-spitter") == 0 
+	and game.forces["enemy"].get_entity_count("medium-spitter") == 0
+	and game.forces["enemy"].get_entity_count("big-spitter") == 0
+	and game.forces["enemy"].get_entity_count("behemoth-spitter") == 0 
+	then
+		game.print("You've won!!!")
 	end
 end
 

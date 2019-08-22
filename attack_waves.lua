@@ -76,7 +76,8 @@ function spawn_biters(settings, waves, lines)
 end
 
 function attack_waves_remote_control(data)
-	local tick = game.tick
+	local offset = 3600*10
+	local tick = game.tick - offset
 	if (tick < data.settings.startup_message_ticks) and not (data.settings.startup_message == nil) then
 		game.print(data.settings.startup_message .. #data.attack_waves)
 	end

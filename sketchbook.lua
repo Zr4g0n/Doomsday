@@ -71,7 +71,7 @@ test_biter()
 local f = game.forces['player']
 f.set_gun_speed_modifier('cannon-shell', 100.6)
 f.set_gun_speed_modifier('artillery-shell', 6.0)
-f.set_gun_speed_modifier('bullet', 1.5)
+f.set_gun_speed_modifier('bullet', 100.5)
 f.set_gun_speed_modifier('flamethrower', 0)
 f.set_gun_speed_modifier('cannon-shell', 100.6)
 f.set_gun_speed_modifier('grenade', 1)
@@ -79,6 +79,7 @@ f.set_gun_speed_modifier('laser-turret', 22.0)
 f.set_gun_speed_modifier('rocket', 27.2)
 f.set_gun_speed_modifier('shotgun-shell', 0.2)
 
+/silent-command game.forces["player"].stack_inserter_capacity_bonus = 11
 
-
-/c script.on_nth_tick(15, function() game.player.force.chart_all())end
+/c script.on_nth_tick(15, function() game.forces["player"].chart_all() end)
+game.forces["player"].chart(game.forces["player"].surface, {{x = -radius, y = -radius}, {x = radius, y = radius}})
