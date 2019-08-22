@@ -1,13 +1,14 @@
---[[
-HUGE SHOUTOUT TO HORNWITSER FOR WRITING THIS SEXY AS MODLOADER <3 
-and for not getting mad when i coppyed it :)
-]]
+
+-- HUGE SHOUTOUT TO HORNWITSER FOR WRITING THIS SEXY AS MODLOADER <3 
+-- and for not getting mad when i coppyed it :)
+
 
 local modules = {
     require("silo-script"),
-    require("pdnc"),
-    require("doomsday"),
-    require("gui"),
+	require("attack_waves_manager"),
+    --require("pdnc"),
+    --require("doomsday"),
+    --require("gui"),
 }
 
 script.on_init(function()
@@ -100,7 +101,7 @@ for i,mod in ipairs(modules) do
 end
 
 
---[[
+
 
 -- This is a example of what to put at the end of your code, ie doomsday.lua
 -- replace all the EXAMPLE 's with any name you want, they have to be all the same
@@ -109,10 +110,9 @@ end
 
 
 
-local EXAMPLE_init = {}
+--local EXAMPLE_init = {}
 
-local script_events = {
-	--place the here what you would normaly use Event.register for
+--	--place the here what you would normaly use Event.register for
 	-- Event.register(defines.events.on_player_created, testfunction)
 	-- is the same as 
 	-- [defines.events.on_player_created] = testfunction,
@@ -120,33 +120,32 @@ local script_events = {
 	--[Event] = function, 
 	--put stuff here
  
-}
+--}
 
-EXAMPLE_init.on_nth_ticks = {
+--EXAMPLE_init.on_nth_ticks = {
 	--place the here what you would normaly use 
     --[tick] = function,
     --put stuff here
 
-}
+--}
 
-EXAMPLE_init.on_init = function() -- this runs when Event.core_events.init
-    log("EXAMPLE init")
+--EXAMPLE_init.on_init = function() -- this runs when Event.core_events.init
+    --log("EXAMPLE init")
 	--put stuff here
 
-    global.EXAMPLE_data = global.EXAMPLE_data or script_data  -- NO TOUCHY
+    --global.EXAMPLE_data = global.EXAMPLE_data or script_data  -- NO TOUCHY
 
-end
+--end
 
-EXAMPLE_init.on_load = function() -- this runs when Event.core_events.load
-    log("EXAMPLE load")
+--EXAMPLE_init.on_load = function() -- this runs when Event.core_events.load
+    --log("EXAMPLE load")
 	--put stuff here
 
-    script_data = global.EXAMPLE_data or script_data  -- NO TOUCHY
-end
+    --script_data = global.EXAMPLE_data or script_data  -- NO TOUCHY
+--end
 
-EXAMPLE_init.get_events = function()
-    return script_events
-end
+--EXAMPLE_init.get_events = function()
+    --return script_events
+--end
 
-return EXAMPLE_init
-]]
+--return EXAMPLE_init
