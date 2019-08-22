@@ -11,14 +11,13 @@ function biter_poly_path(points, waves)
 			type = defines.command.attack_area,
 			destination = points[i],
 			distraction = distraction,
-			radius = 3, 
+			radius = 5, 
 		}
 	end
 	return list_of_commands
 end
 
 function spawn_biters_with_path(points, waves, settings)
-	game.print(settings.surface)
 	local groups = game.surfaces[settings.surface].create_unit_group({
 		position = points[1]})
 	-- first x,y in points[] is used as the spawn point.
@@ -63,7 +62,7 @@ function spawn_biters(settings, waves, lines)
 		}
 	end
 	local paths = {} 
-	for i=0, waves.nodes do
+	for i=1, waves.nodes do
 		for j = 1, #lines do
 			paths[j] = {
 				x = (lines[j].start.x + (step_size[j].x * i)),
@@ -84,7 +83,7 @@ function attack_waves_remote_control(data)
 	for i = 1, #data.attack_waves do
 		if tick >= data.attack_waves[i].trigger_tick and not data.attack_waves[i].has_happened then
 			spawn_biters(data.settings, data.attack_waves[i], data.lines)
-			if not data.attack_waves[i].message == nil then
+			if not (data.attack_waves[i].message == nil) then
 				game.print(data.attack_waves[i].message)
 			end
 			data.attack_waves[i].has_happened = true

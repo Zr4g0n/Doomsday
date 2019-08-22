@@ -141,6 +141,7 @@ local tick_time = {
 	hour = 216000,-- in ticks
 }
 
+
 global.attack_wave_manager_table =
 {{	
 	attack_waves = {
@@ -443,6 +444,99 @@ global.attack_wave_manager_table =
 		surface = 1,
 	}
 }}
+function attack_waves_manager_get_enemy(n)
+	if math.random() > 0.5 then return attack_waves_manager_get_biter(n)end
+	return attack_waves_manager_get_spitter(n)
+end
+
+function attack_waves_manager_get_biter(n)
+	local biters={"small-biter","medium-biter","big-biter","behemoth-biter"}
+	--game.print(n)
+	n = n + math.random()*0.5
+	if n < 1 then n = 1 end
+	if n > 4 then n = 4 end
+	return biters[math.floor(n + 0.5)]
+end
+function attack_waves_manager_get_spitter(n)
+	local spitters={"small-spitter","medium-spitter","big-spitter","behemoth-spitter"}
+	n = n + math.random()*0.5
+	if n < 1 then n = 1 end
+	if n > 4 then n = 4 end
+	return spitters[math.floor(n + 0.5)]
+end
+
+
+
+function attack_waves_manager_setup()
+	local offset_start_time = tick_time.minute*20
+	local time_between_waves = 2 * tick_time.minute * (math.random()+0.5)
+	local number_of_waves = tick_time.hour / time_between_waves
+	local new_set = {settings={}, lines={},attack_waves={}}
+	new_set.settings={
+		biter_spawn_radius = 20,
+		startup_message_ticks = 1000,
+		startup_message = "Automatically generated wave. South to north. Waves generated: ", --#waves
+		surface = 1,
+	}
+	new_set.lines={ -- from south marching north towards spawn
+		{
+			start = {x = -100, y = 300}, 
+			stop  = {x =  100, y = 300}
+		},{
+			start = {x = -100, y = 250},
+			stop  = {x =  100, y = 250} 
+		},{
+			start = {x = -100, y = 200},
+			stop  = {x =  100, y = 200} 
+		},{
+			start = {x = -100, y = 150},
+			stop  = {x =  100, y = 150} 
+		},{
+			start = {x = -100, y = 100},
+			stop  = {x =  100, y = 100} 
+		},{
+			start = {x = -100, y =  50},
+			stop  = {x =  100, y =  50} 
+		},{
+			start = {x = -100, y =   0},
+			stop  = {x =  100, y =   0} 
+		},{
+			start = {x = -100, y =  -50},
+			stop  = {x =  100, y =  -50} 
+		},{
+			start = {x =   20, y =   0},
+			stop  = {x =  -20, y =   0}
+	}}
+	local random_holder = 0
+	for i=1, number_of_waves do
+		random_holder = math.random(2,20)
+		new_set.attack_waves[i] = {
+			has_happened = false,
+			trigger_tick = offset_start_time + time_between_waves*i,
+			biter_to_spawn = attack_waves_manager_get_enemy(i/(number_of_waves/4)),
+			nodes = random_holder,
+			group_size = 200/random_holder,
+			distraction = defines.distraction.none,
+		}
+	end
+	new_set_mirror = deepcopy(new_set)
+	for i=1, number_of_waves do
+		random_holder = math.random(2,20)
+		new_set_mirror.attack_waves[i].biter_to_spawn = attack_waves_manager_get_enemy(i/(number_of_waves/4))
+		new_set_mirror.attack_waves[i].nodes = random_holder
+		new_set_mirror.attack_waves[i].group_size = 200/random_holder
+	end
+	for i=1, #new_set_mirror.lines do
+		new_set_mirror.lines[i].start.y = -1 * new_set_mirror.lines[i].start.y
+		new_set_mirror.lines[i].stop.y = -1 * new_set_mirror.lines[i].stop.y
+	end
+	new_set_mirror.settings.startup_message = "Automatically generated wave. North to south. Waves generated: " --#waves
+
+	--global.attack_wave_manager_table[4] = new_set
+	--global.attack_wave_manager_table[5] = new_set_mirror
+	global.attack_wave_manager_table[#global.attack_wave_manager_table+1] = new_set
+	global.attack_wave_manager_table[#global.attack_wave_manager_table+1] = new_set_mirror
+end
 
 function attack_waves_manager_core()
 	--game.forces["player"].set_spawn_position(spawn_point, .surface)
@@ -451,10 +545,28 @@ function attack_waves_manager_core()
 		-- this is the best way I know to get the 'has happened' boolean back
 		-- to the global table while supporting arbitrary number of waves. 
 	end
+	local value = 1+math.random()*4
 	if game.tick < 300 then
 		game.forces["player"].chart(1, {{x = -500, y = -500}, {x = 500, y = 500}})
 	end
 end
+
+-- stolen from http://lua-users.org/wiki/CopyTable
+function deepcopy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+        end
+        setmetatable(copy, deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
+
 
 -- The following stuff is to make it easier to run multiple different 
 -- copies of the same event. Thanks HORNWITSER
@@ -470,7 +582,7 @@ attack_waves_init.on_nth_ticks = {
 
 attack_waves_init.on_init = function() -- this runs when Event.core_events.init
     log("attack_waves_manager init")
-	--put stuff here
+	attack_waves_manager_setup() -- generates n->s and s->n waves
     global.attack_waves_data = global.attack_waves_data or script_data  -- NO TOUCHY
 end
 
