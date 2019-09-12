@@ -169,8 +169,8 @@ function attack_waves_manager_error_checker(wave)
 
 				-- has_happened
 				if not type(wave.attack_waves[i].has_happened) == "boolean" then
-					error_message[#error_message+1] = "attack_waves[" .. i .. "].has_happened is "
-					..type(wave.attack_waves[i].has_happened).."; has to be a boolean!"
+					error_message[#error_message+1] = ("attack_waves[" .. i .. "].has_happened is "
+					..type(wave.attack_waves[i].has_happened).."; has to be a boolean!")
 				end
 
 				-- trigger_tick
@@ -243,8 +243,8 @@ function attack_waves_manager_error_checker(wave)
 
 		-- lines
 		if not type(wave.lines) == "table" then
-			error_message[#error_message+1] = "lines table is "
-			.. type(wave.lines) .. " and not a table!"
+			error_message[#error_message+1] = ("lines table is "
+			.. type(wave.lines) .. " and not a table!")
 		else -- the table existis and contains *something*
 			-- check if the key exists, is of the right type, and within expected range
 			if #wave.lines < 2 then
@@ -285,8 +285,8 @@ function attack_waves_manager_error_checker(wave)
 
 		-- settomgs
 		if not type(wave.settings) == "table" then
-			error_message[#error_message+1] = "settings table is "
-			.. type(wave.settings) .. " and not a table!"
+			error_message[#error_message+1] = ("settings table is "
+			.. type(wave.settings) .. " and not a table!")
 		else -- the table existis and contains *something*
 			-- check if the key exists, is of the right type, and within expected range
 
@@ -327,6 +327,8 @@ function attack_waves_manager_error_checker(wave)
 			for i = 1, #error_message do
 				log(error_message[i])
 			end
+		else
+			error_message[1] = " contains no errors"
 		end
 		return error_message
 	else
@@ -340,13 +342,9 @@ function attack_wave_manager_print_errors()
 	game.print("test1")
 	local error_message = {}
 	for i=1, #global.attack_wave_manager_table do
-		game.print("test2")
 		error_message = attack_waves_manager_error_checker(global.attack_wave_manager_table[i])
-		game.print(#error_message)
 		for j=1, #error_message do
-			game.print("test3")
 			game.print("global.attack_wave_manager_table["..i.."]." .. error_message[j])
-			
 		end 
 	end 
 end
