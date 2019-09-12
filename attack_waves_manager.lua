@@ -141,6 +141,215 @@ local tick_time = {
 	hour = 216000,-- in ticks
 }
 
+function attack_waves_manager_get_default_wave_settings(startup_message)
+	local message = startup_message or "Default wave settings"
+	local settings = {
+	biter_spawn_radius = 50, -- the radius that will be searched when trying
+	                         -- to spawn in a biter. If failed, no (more)
+	                         -- biters will be spawned at that node. 
+	startup_message_ticks = 1000, -- The startup message will be printed each time
+	                              -- the core is called until this many ticks. 
+	                              -- Very useful to verify a wave-set is loaded. 
+	startup_message = message,
+	surface = 1, -- the surface this wave will be spawned on. 1 is the normal surface. 
+	}
+	return settings
+end 
+
+function attack_waves_manager_error_checker(wave)
+	local error_message = {}
+	if wave then
+		-- attack_waves
+		if not type(wave.attack_waves) == "table" then
+			error_message[#error_message+1] = ("attack_wave table is "
+			.. type(wave.attack_waves) .. " and not a table!")
+		else -- the table existis and contains *something*
+			for i = 1, #wave.attack_waves do 
+				-- check if the key exists, is of the right type, and within expected range
+
+				-- has_happened
+				if not type(wave.attack_waves[i].has_happened) == "boolean" then
+					error_message[#error_message+1] = "attack_waves[" .. i .. "].has_happened is "
+					..type(wave.attack_waves[i].has_happened).."; has to be a boolean!"
+				end
+
+				-- trigger_tick
+				if not type(wave.attack_waves[i].trigger_tick) == "number" then
+					error_message[#error_message+1] = ("attack_waves[" .. i .. "].trigger_tick is "
+						.. wave.attack_waves[i].trigger_tick .."; has to be a number larger than zero!")
+				end
+				if type(wave.attack_waves[i].trigger_tick) == "number"
+					and wave.attack_waves[i].trigger_tick <= 0 then
+					error_message[#error_message+1] = ("attack_waves[" .. i .. "].trigger_tick is "
+						.. wave.attack_waves[i].trigger_tick .."; has to be greater than 0!")
+				end
+
+				-- biter_to_spawn
+				if not type(wave.attack_waves[i].biter_to_spawn) == "string" then
+					error_message[#error_message+1] = ("attack_waves[" .. i .. "].biter_to_spawn is a "
+						.. type(wave.attack_waves[i].biter_to_spawn) .."; has to be a string!")
+				end
+				if type(wave.attack_waves[i].biter_to_spawn) == "string" 
+					and not -- TODO: automatically get list of valid biters
+					  (wave.attack_waves[i].biter_to_spawn == "small-biter"
+					or wave.attack_waves[i].biter_to_spawn == "medium-biter"
+					or wave.attack_waves[i].biter_to_spawn == "big-biter"
+					or wave.attack_waves[i].biter_to_spawn == "behemoth-biter"
+					or wave.attack_waves[i].biter_to_spawn == "small-spitter"
+					or wave.attack_waves[i].biter_to_spawn == "medium-spitter"
+					or wave.attack_waves[i].biter_to_spawn == "big-spitter"
+					or wave.attack_waves[i].biter_to_spawn == "behemoth-spitter")
+					then
+					error_message[#error_message+1] = ("attack_waves[" .. i .. "].biter_to_spawn is "
+						.. wave.attack_waves[i].biter_to_spawn .. " and that's not a known type of biter!")
+				end
+
+				-- nodes
+				if not type(wave.attack_waves[i].nodes) == "number" then
+					error_message[#error_message+1] = ("attack_waves[" .. i .. "].nodes is a "
+						.. type(wave.attack_waves[i].nodes) .."; has to be a number!")
+				end
+				if type(wave.attack_waves[i].nodes) == "number" 
+					and wave.attack_waves[i].nodes <= 0 then
+					error_message[#error_message+1] = ("Attack_waves[" .. i .. "].nodes is "
+						.. wave.attack_waves[i].nodes .."; has to be a number greater than zero!")
+				end
+
+				-- group_size
+				if not type(wave.attack_waves[i].group_size) == "number" then
+					error_message[#error_message+1] = ("attack_waves[" .. i .. "].group_size is a "
+					.. type(wave.attack_waves[i].group_size).."; has to be a number")
+				end
+				if type(wave.attack_waves[i].group_size) == "number" 
+					and wave.attack_waves[i].group_size <= 0 then
+					error_message[#error_message+1] = ("attack_waves[" .. i .. "].group_size is "
+					.. type(wave.attack_waves[i].group_size).."; has to be a number")
+				end
+
+				-- distraction
+				if not type(wave.attack_waves[i].distraction) == "number"
+					and (wave.attack_waves[i].distraction >=  0 and wave.attack_waves[i].distraction <= 4) then
+					error_message[#error_message+1] = ("attack_waves[" .. i .. "].distraction is a "
+						.. type(wave.attack_waves[i].distraction) .. " incorrect; This is an optional key")
+				end
+
+				-- message
+				if not type(wave.attack_waves[i].message) == "string" then
+					error_message[#error_message+1] = ("attack_waves[" .. i .. "].message was a "
+						.. type(wave.attack_waves[i].message) .." and not a string. This is an optional key")
+				end
+			end -- end of loop
+		end
+
+		-- lines
+		if not type(wave.lines) == "table" then
+			error_message[#error_message+1] = "lines table is "
+			.. type(wave.lines) .. " and not a table!"
+		else -- the table existis and contains *something*
+			-- check if the key exists, is of the right type, and within expected range
+			if #wave.lines < 2 then
+				error_message[#error_message+1] = ("number of lines is less than 2; this won't work correctly.")
+			end
+			for i = 1, #wave.lines do
+				-- start x and y
+				if type(wave.lines[i].start) == "table" then
+					if not type(wave.lines[i].start.x) == "number" then
+						error_message[#error_message+1] = ("wave.lines["..i.."].start.x is "
+						.. type(wave.lines[i].start.x) .." and not a number!")
+					end
+					if not type(wave.lines[i].start.y) == "number" then
+						error_message[#error_message+1] = ("wave.lines["..i.."].start.y is "
+						.. type(wave.lines[i].start.y) .." and not a number!")
+					end
+				else
+					error_message[#error_message+1] = ("wave.lines["..i.."].start is a "
+						.. type(wave.lines[i].start) .." and not a table!")
+				end
+
+				-- stop x and y
+				if type(wave.lines[i].stop) == "table" then
+					if not type(wave.lines[i].stop.x) == "number" then
+						error_message[#error_message+1] = ("wave.lines["..i.."].stop.x is "
+						.. type(wave.lines[i].stop.x) .." and not a number!")
+					end
+					if not type(wave.lines[i].stop.y) == "number" then
+						error_message[#error_message+1] = ("wave.lines["..i.."].stop.y is "
+						.. type(wave.lines[i].stop.y) .." and not a number!")
+					end
+				else
+					error_message[#error_message+1] = ("wave.lines["..i.."].stop is a "
+						.. type(wave.lines[i].stop) .." and not a table!")
+				end
+			end -- end of loop
+		end
+
+		-- settomgs
+		if not type(wave.settings) == "table" then
+			error_message[#error_message+1] = "settings table is "
+			.. type(wave.settings) .. " and not a table!"
+		else -- the table existis and contains *something*
+			-- check if the key exists, is of the right type, and within expected range
+
+			-- biter_spawn_radius
+			if not type(wave.settings.biter_spawn_radius) == "number" then
+				error_message[#error_message+1] = ("wave.settings.biter_spawn_radius is "
+				.. type(wave.settings.biter_spawn_radius) .." and not a number!")
+			end
+			if wave.settings.biter_spawn_radius < 1 then
+				error_message[#error_message+1] = ("wave.settings.biter_spawn_radius is "
+				.. wave.settings.biter_spawn_radius  .."; has to be a number greater than zero!")
+			end
+
+			-- startup_message_ticks
+			if not type(wave.settings.startup_message_ticks) == "number" then
+				error_message[#error_message+1] = ("wave.settings.startup_message_ticks is "
+				.. type(wave.settings.startup_message_ticks) .." and not a number!")
+			end
+			if wave.settings.startup_message_ticks < 1 then
+				error_message[#error_message+1] = ("wave.settings.startup_message_ticks is "
+				.. wave.settings.startup_message_ticks  .."; has to be a number greater than zero!")
+			end
+
+			-- startup_message
+			if not type(wave.settings.startup_message) == "string" then
+				error_message[#error_message+1] = ("wave.settings.startup_message is "
+				.. type(wave.settings.startup_message) .." and not a string! This is optional")
+			end
+			
+			-- surface
+			if not type(wave.settings.surface) == "number" then
+				error_message[#error_message+1] = ("wave.settings.surface is "
+				.. type(wave.settings.surface) .." and not a number! ")
+			end
+		end
+
+		if #error_message > 0 then
+			for i = 1, #error_message do
+				log(error_message[i])
+			end
+		end
+		return error_message
+	else
+		error_message = "You checked if nil contains errors? Really? It's empty! There's nothing to check!"
+		log(error_message)
+		return error_message
+	end
+end
+
+function attack_wave_manager_print_errors()
+	game.print("test1")
+	local error_message = {}
+	for i=1, #global.attack_wave_manager_table do
+		game.print("test2")
+		error_message = attack_waves_manager_error_checker(global.attack_wave_manager_table[i])
+		game.print(#error_message)
+		for j=1, #error_message do
+			game.print("test3")
+			game.print("global.attack_wave_manager_table["..i.."]." .. error_message[j])
+			
+		end 
+	end 
+end
 
 global.attack_wave_manager_table =
 {{	
@@ -172,7 +381,7 @@ global.attack_wave_manager_table =
 		},{
 			has_happened = false,
 			trigger_tick = tick_time.minute*16,
-			biter_to_spawn = "small-biter",
+			--biter_to_spawn = "small-biter",
 			nodes = 5,
 			group_size = 20--10
 		},{
@@ -201,12 +410,7 @@ global.attack_wave_manager_table =
 			start = {x = 20, y = -20},
 			stop  = {x = 20, y =  20}
 	}},
-	settings = {
-		biter_spawn_radius = 10,
-		startup_message_ticks = 1000,
-		startup_message = "Normal east to west attack wave loaded. Contains this many waves: ",
-		surface = 1,
-	}
+	settings = attack_waves_manager_get_default_wave_settings("Normal east to west attack wave loaded. Contains this many waves: ")
 },{	
 	attack_waves = {
 		{
@@ -268,12 +472,8 @@ global.attack_wave_manager_table =
 			start = {x =  20, y = -50},
 			stop  = {x =  20, y =  50}
 	}},
-	settings = {
-		biter_spawn_radius = 50,
-		startup_message_ticks = 1000,
-		startup_message = "Normal west to east attack wave loaded. Contains this many waves: ",
-		surface = 1,
-	}
+	settings = attack_waves_manager_get_default_wave_settings("Normal west to east attack wave loaded. Contains this many waves: ")
+	
 },{
 	-- brutal set of waves designed to push players to the brink of death every time.
 	-- these use the lack of flat resistance on the behemoth spitter to freak the 
@@ -437,12 +637,8 @@ global.attack_wave_manager_table =
 			start = {x =   20, y =    0},
 			stop  = {x =  -20, y =    0}
 	}},
-	settings = {
-		biter_spawn_radius = 100,
-		startup_message_ticks = 1000,
-		startup_message = "Double-sided attack wave loaded. How many waves will fuck you up? The answer is ", --#waves
-		surface = 1,
-	}
+	settings = attack_waves_manager_get_default_wave_settings(
+		"Double-sided attack wave loaded. How many waves will fuck you up? The answer is ")
 }}
 function attack_waves_manager_get_enemy(n)
 	if math.random() > 0.5 then return attack_waves_manager_get_biter(n)end
@@ -699,12 +895,12 @@ function attack_waves_manager_setup()
 			start = {x =   0, y =   0},
 			stop  = {x =   0, y =   0}
 		}},
-	settings = {
-		biter_spawn_radius = 10,
-		startup_message_ticks = 1000,
-		startup_message = "South-east to north-west attack wave loaded. Contains this many waves: ",
-		surface = 1,
-	}}
+	settings = attack_waves_manager_get_default_wave_settings("South-east to north-west attack wave loaded. Contains this many waves: ")
+	}
+
+	for i=1, #global.attack_wave_manager_table do
+		attack_waves_manager_error_checker(global.attack_wave_manager_table[i])
+	end -- this will log any and all errors to the console
 end
 
 function attack_waves_manager_core()
@@ -716,7 +912,6 @@ function attack_waves_manager_core()
 		-- this is the best way I know to get the 'has happened' boolean back
 		-- to the global table while supporting arbitrary number of waves. 
 	end
-	local value = 1+math.random()*4
 	if game.tick < 300 then
 		game.forces["player"].chart(1, {{x = -500, y = -500}, {x = 500, y = 500}})
 	end
@@ -758,7 +953,6 @@ function deepcopy(orig)
     end
     return copy
 end
-
 
 -- The following stuff is to make it easier to run multiple different 
 -- copies of the same event. Thanks HORNWITSER
