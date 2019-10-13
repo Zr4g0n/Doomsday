@@ -98,7 +98,6 @@ function attack_waves_manager_error_checker(wave, include_optinal)
 						.. wave.attack_waves[i].distraction .. " and not between 0 and 4; this is an optional key")
 				end
 
-
 				-- message
 				if not (type(wave.attack_waves[i].message) == "string") then
 					if (include_optinal) and not (type(wave.attack_waves[i].message) == "nil") then
@@ -259,20 +258,21 @@ function attack_waves_manager_core()
 		end
 	end
 	if counter == 0 then
-		global.attack_waves_manager_final_spawn = true
+		if  attack_waves_manager_no_biters() then
+			game.print("You've won!!!")
+		end
 	end
-	if  global.attack_waves_manager_final_spawn
-	and game.forces["enemy"].get_entity_count("small-biter") == 0 
-	and game.forces["enemy"].get_entity_count("medium-biter") == 0
-	and game.forces["enemy"].get_entity_count("big-biter") == 0
-	and game.forces["enemy"].get_entity_count("behemoth-biter") == 0
-	and game.forces["enemy"].get_entity_count("small-spitter") == 0 
-	and game.forces["enemy"].get_entity_count("medium-spitter") == 0
-	and game.forces["enemy"].get_entity_count("big-spitter") == 0
-	and game.forces["enemy"].get_entity_count("behemoth-spitter") == 0 
-	then
-		game.print("You've won!!!")
-	end
+end
+
+function attack_waves_manager_no_biters()
+	return  (game.forces["enemy"].get_entity_count("small-biter") == 0) 
+		and (game.forces["enemy"].get_entity_count("medium-biter") == 0)
+		and (game.forces["enemy"].get_entity_count("big-biter") == 0)
+		and (game.forces["enemy"].get_entity_count("behemoth-biter") == 0)
+		and (game.forces["enemy"].get_entity_count("small-spitter") == 0) 
+		and (game.forces["enemy"].get_entity_count("medium-spitter") == 0)
+		and (game.forces["enemy"].get_entity_count("big-spitter") == 0)
+		and (game.forces["enemy"].get_entity_count("behemoth-spitter") == 0)
 end
 
 -- stolen from http://lua-users.org/wiki/CopyTable
