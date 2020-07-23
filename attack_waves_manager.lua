@@ -24,7 +24,13 @@ function attack_waves_manager_get_default_wave_settings(startup_message)
 	}
 end
 
+-- looks through the entire set, checking that all the data is as expected. 
+-- if include_optinal is 
 function attack_waves_manager_error_checker(wave, include_optinal)
+	-- https://lua-api.factorio.com/latest/defines.html#defines.distraction
+	local distraction_min = 0 
+	local distraction_max = 4
+
 	local error_message = {}
 	if wave then
 		-- attack_waves
@@ -93,7 +99,7 @@ function attack_waves_manager_error_checker(wave, include_optinal)
 					end
 				end
 				if (type(wave.attack_waves[i].distraction) == "number")
-				and (wave.attack_waves[i].distraction < 0 and wave.attack_waves[i].distraction > 4) then
+				and (wave.attack_waves[i].distraction < distraction_min and wave.attack_waves[i].distraction > distraction_max) then
 					error_message[#error_message+1] = ("attack_waves[" .. i .. "].distraction is "
 						.. wave.attack_waves[i].distraction .. " and not between 0 and 4; this is an optional key")
 				end
@@ -115,7 +121,7 @@ function attack_waves_manager_error_checker(wave, include_optinal)
 		else -- the table existis and contains *something*
 			-- check if the key exists, is of the right type, and within expected range
 			if #wave.lines < 2 then
-				error_message[#error_message+1] = ("number of lines is less than 2; this won't work correctly.")
+				error_message[#error_message+1] = ("number of lines is less than 2; 2 or more is required for the logic to work")
 			end
 			for i = 1, #wave.lines do
 				-- start x and y
@@ -217,12 +223,14 @@ function attack_wave_manager_print_errors(optional)
 	end 
 end
 
-
+ -- returns random enemy type of N size, with some noise
+ -- 1 - small, 2 medium, 3 big, 4 behemoth-biter
 function attack_waves_manager_get_enemy(n)
 	if math.random() > 0.5 then return attack_waves_manager_get_biter(n)end
 	return attack_waves_manager_get_spitter(n)
 end
 
+-- returns biter of N size, see above
 function attack_waves_manager_get_biter(n)
 	local biters={"small-biter","medium-biter","big-biter","behemoth-biter"}
 	--game.print(n)
@@ -231,6 +239,8 @@ function attack_waves_manager_get_biter(n)
 	if n > 4 then n = 4 end
 	return biters[math.floor(n + 0.5)]
 end
+
+-- returns spitter of N size, see above
 function attack_waves_manager_get_spitter(n)
 	local spitters={"small-spitter","medium-spitter","big-spitter","behemoth-spitter"}
 	n = n + math.random()*0.5
@@ -251,20 +261,20 @@ function attack_waves_manager_core()
 	if game.tick < 300 then
 		game.forces["player"].chart(1, {{x = -500, y = -500}, {x = 500, y = 500}})
 	end
-	local counter = 0
+	local remaining_waves = 0
 	for i = 1, #global.attack_wave_data_table do
 		for j = 1, #global.attack_wave_data_table[i].attack_waves do
-			if not global.attack_wave_data_table[i].attack_waves[j].has_happened then counter = counter + 1 end
+			if not global.attack_wave_data_table[i].attack_waves[j].has_happened then remaining_waves = remaining_waves + 1 end
 		end
 	end
-	if counter == 0 then
+	if remaining_waves == 0 then
 		if  attack_waves_manager_no_biters() then
 			game.print("You've won!!!")
-		end
+		end -- last wave has spawned AND there's no biters left
 	end
 end
 
-function attack_waves_manager_no_biters()
+function attack_waves_manager_no_biters() -- returns true if there are no biters left
 	return  (game.forces["enemy"].get_entity_count("small-biter") == 0) 
 		and (game.forces["enemy"].get_entity_count("medium-biter") == 0)
 		and (game.forces["enemy"].get_entity_count("big-biter") == 0)
