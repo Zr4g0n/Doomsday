@@ -1,4 +1,5 @@
-global.attack_waves_manager_final_spawn = false
+--global.attack_waves_manager_final_spawn = false -- unused?
+global.attack_waves_manager_enabled = true
 require("attack_waves")
 require("attack_waves_data")
 local tick_time = {
@@ -6,6 +7,26 @@ local tick_time = {
 	minute = 3600,-- in ticks
 	hour = 216000,-- in ticks
 }
+
+function attack_waves_manager_print_status()
+	if global.attack_waves_manager_enabled then
+		game.print("attack_waves_manager is enabled")
+		if global.attack_waves_manager_debug then
+			attack_wave_manager_print_errors(true) -- prints any errors, including optional tags in the data 
+		end
+	else
+		game.print("attack_waves_manager is disabled")
+	end
+end
+
+function attack_waves_manager_toggle()
+	global.attack_waves_manager_enabled = not global.attack_waves_manager_enabled
+	if global.attack_waves_manager_enabled then
+		game.print("attack_waves_manager is now enabled")
+	else
+		game.print("attack_waves_manager is now diabled")
+	end
+end
 
 function isValidEnemyUnit(s)
 	return game.entity_prototypes[s] and game.entity_prototypes[s].type == "unit" 
@@ -250,27 +271,29 @@ function attack_waves_manager_get_spitter(n)
 end
 
 function attack_waves_manager_core()
-	--todo; seperate lines from waves, allow random selection of lines for each wave
-	--      unless a wave specifies what set of lines to use
-	--game.forces["player"].set_spawn_position(spawn_point, .surface)
-	for i = 1, #global.attack_wave_data_table do
-		global.attack_wave_data_table[i].attack_waves = attack_waves_remote_control(global.attack_wave_data_table[i])
-		-- this is the best way I know to get the 'has happened' boolean back
-		-- to the global table while supporting arbitrary number of waves. 
-	end
-	if game.tick < 300 then
-		game.forces["player"].chart(1, {{x = -500, y = -500}, {x = 500, y = 500}})
-	end
-	local remaining_waves = 0
-	for i = 1, #global.attack_wave_data_table do
-		for j = 1, #global.attack_wave_data_table[i].attack_waves do
-			if not global.attack_wave_data_table[i].attack_waves[j].has_happened then remaining_waves = remaining_waves + 1 end
+	if global.attack_waves_manager_enabled then
+		--todo; seperate lines from waves, allow random selection of lines for each wave
+		--      unless a wave specifies what set of lines to use
+		--game.forces["player"].set_spawn_position(spawn_point, .surface)
+		for i = 1, #global.attack_wave_data_table do
+			global.attack_wave_data_table[i].attack_waves = attack_waves_remote_control(global.attack_wave_data_table[i])
+			-- this is the best way I know to get the 'has happened' boolean back
+			-- to the global table while supporting arbitrary number of waves. 
 		end
-	end
-	if remaining_waves == 0 then
-		if  attack_waves_manager_no_biters() then
-			game.print("You've won!!!")
-		end -- last wave has spawned AND there's no biters left
+		if game.tick < 300 then
+			game.forces["player"].chart(1, {{x = -500, y = -500}, {x = 500, y = 500}})
+		end
+		local remaining_waves = 0
+		for i = 1, #global.attack_wave_data_table do
+			for j = 1, #global.attack_wave_data_table[i].attack_waves do
+				if not global.attack_wave_data_table[i].attack_waves[j].has_happened then remaining_waves = remaining_waves + 1 end
+			end
+		end
+		if remaining_waves == 0 then
+			if  attack_waves_manager_no_biters() then
+				game.print("You've won!!!")
+			end -- last wave has spawned AND there's no biters left
+		end
 	end
 end
 
