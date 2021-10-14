@@ -83,3 +83,6 @@ f.set_gun_speed_modifier('shotgun-shell', 0.2)
 
 /c script.on_nth_tick(15, function() game.forces["player"].chart_all() end)
 game.forces["player"].chart(game.forces["player"].surface, {{x = -radius, y = -radius}, {x = radius, y = radius}})
+
+
+/c for key,value in pairs(game.surfaces) do game.print(key,value) end
